@@ -30,6 +30,8 @@ import type {
   GetCreditChargeListResponse,
   GetCreditHistoryListRequest,
   GetCreditHistoryListResponse,
+  GetCreditRemainRequest,
+  GetCreditRemainResponse,
   ResetPasswordAttemptCountRequest,
   ResetPasswordAttemptCountResponse,
   ResetPasswordRequest,
@@ -47,6 +49,7 @@ export interface ParentUserGrpcClient {
 
 export interface SmsManagementGrpcClient {
   ChargeCredit(request: ChargeCreditRequest, metadata?: Metadata): Observable<ChargeCreditResponse>;
+  GetCreditRemain(request: GetCreditRemainRequest, metadata?: Metadata): Observable<GetCreditRemainResponse>;
   GetCreditChargeList(request: GetCreditChargeListRequest, metadata?: Metadata): Observable<GetCreditChargeListResponse>;
   GetCreditHistoryList(request: GetCreditHistoryListRequest, metadata?: Metadata): Observable<GetCreditHistoryListResponse>;
 }

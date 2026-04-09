@@ -6,11 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import type {
-  handleUnaryCall,
-  Metadata,
-  UntypedServiceImplementation,
-} from "@grpc/grpc-js";
+import type { handleUnaryCall, Metadata, UntypedServiceImplementation } from "@grpc/grpc-js";
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
@@ -23,6 +19,19 @@ export interface ChargeCreditRequest {
 
 export interface ChargeCreditResponse {
   success: boolean;
+}
+
+/** --- SMS 크레딧 잔액 조회 --- */
+export interface GetCreditRemainRequest {
+  schoolId: number;
+}
+
+export interface GetCreditRemainResponse {
+  id?: number | undefined;
+  createdAt?: string | undefined;
+  updatedAt?: string | undefined;
+  schoolId: number;
+  remainCredit: number;
 }
 
 /** --- SMS 크레딧 충전 이력 조회 --- */
@@ -89,10 +98,7 @@ function createBaseChargeCreditRequest(): ChargeCreditRequest {
 }
 
 export const ChargeCreditRequest: MessageFns<ChargeCreditRequest> = {
-  encode(
-    message: ChargeCreditRequest,
-    writer: BinaryWriter = new BinaryWriter()
-  ): BinaryWriter {
+  encode(message: ChargeCreditRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.schoolId !== 0) {
       writer.uint32(8).int32(message.schoolId);
     }
@@ -105,12 +111,8 @@ export const ChargeCreditRequest: MessageFns<ChargeCreditRequest> = {
     return writer;
   },
 
-  decode(
-    input: BinaryReader | Uint8Array,
-    length?: number
-  ): ChargeCreditRequest {
-    const reader =
-      input instanceof BinaryReader ? input : new BinaryReader(input);
+  decode(input: BinaryReader | Uint8Array, length?: number): ChargeCreditRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseChargeCreditRequest();
     while (reader.pos < end) {
@@ -155,22 +157,15 @@ function createBaseChargeCreditResponse(): ChargeCreditResponse {
 }
 
 export const ChargeCreditResponse: MessageFns<ChargeCreditResponse> = {
-  encode(
-    message: ChargeCreditResponse,
-    writer: BinaryWriter = new BinaryWriter()
-  ): BinaryWriter {
+  encode(message: ChargeCreditResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.success !== false) {
       writer.uint32(8).bool(message.success);
     }
     return writer;
   },
 
-  decode(
-    input: BinaryReader | Uint8Array,
-    length?: number
-  ): ChargeCreditResponse {
-    const reader =
-      input instanceof BinaryReader ? input : new BinaryReader(input);
+  decode(input: BinaryReader | Uint8Array, length?: number): ChargeCreditResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseChargeCreditResponse();
     while (reader.pos < end) {
@@ -194,104 +189,211 @@ export const ChargeCreditResponse: MessageFns<ChargeCreditResponse> = {
   },
 };
 
+function createBaseGetCreditRemainRequest(): GetCreditRemainRequest {
+  return { schoolId: 0 };
+}
+
+export const GetCreditRemainRequest: MessageFns<GetCreditRemainRequest> = {
+  encode(message: GetCreditRemainRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.schoolId !== 0) {
+      writer.uint32(8).int32(message.schoolId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditRemainRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditRemainRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetCreditRemainResponse(): GetCreditRemainResponse {
+  return { schoolId: 0, remainCredit: 0 };
+}
+
+export const GetCreditRemainResponse: MessageFns<GetCreditRemainResponse> = {
+  encode(message: GetCreditRemainResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== undefined) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.createdAt !== undefined) {
+      writer.uint32(18).string(message.createdAt);
+    }
+    if (message.updatedAt !== undefined) {
+      writer.uint32(26).string(message.updatedAt);
+    }
+    if (message.schoolId !== 0) {
+      writer.uint32(32).int32(message.schoolId);
+    }
+    if (message.remainCredit !== 0) {
+      writer.uint32(40).int32(message.remainCredit);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditRemainResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditRemainResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.remainCredit = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseGetCreditChargeListRequest(): GetCreditChargeListRequest {
   return { page: 0, limit: 0, schoolId: 0, startDate: "", endDate: "" };
 }
 
-export const GetCreditChargeListRequest: MessageFns<GetCreditChargeListRequest> =
-  {
-    encode(
-      message: GetCreditChargeListRequest,
-      writer: BinaryWriter = new BinaryWriter()
-    ): BinaryWriter {
-      if (message.page !== 0) {
-        writer.uint32(8).int32(message.page);
-      }
-      if (message.limit !== 0) {
-        writer.uint32(16).int32(message.limit);
-      }
-      if (message.schoolId !== 0) {
-        writer.uint32(24).int32(message.schoolId);
-      }
-      if (message.startDate !== "") {
-        writer.uint32(34).string(message.startDate);
-      }
-      if (message.endDate !== "") {
-        writer.uint32(42).string(message.endDate);
-      }
-      return writer;
-    },
+export const GetCreditChargeListRequest: MessageFns<GetCreditChargeListRequest> = {
+  encode(message: GetCreditChargeListRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.page !== 0) {
+      writer.uint32(8).int32(message.page);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(16).int32(message.limit);
+    }
+    if (message.schoolId !== 0) {
+      writer.uint32(24).int32(message.schoolId);
+    }
+    if (message.startDate !== "") {
+      writer.uint32(34).string(message.startDate);
+    }
+    if (message.endDate !== "") {
+      writer.uint32(42).string(message.endDate);
+    }
+    return writer;
+  },
 
-    decode(
-      input: BinaryReader | Uint8Array,
-      length?: number
-    ): GetCreditChargeListRequest {
-      const reader =
-        input instanceof BinaryReader ? input : new BinaryReader(input);
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseGetCreditChargeListRequest();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 8) {
-              break;
-            }
-
-            message.page = reader.int32();
-            continue;
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditChargeListRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditChargeListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
           }
-          case 2: {
-            if (tag !== 16) {
-              break;
-            }
 
-            message.limit = reader.int32();
-            continue;
-          }
-          case 3: {
-            if (tag !== 24) {
-              break;
-            }
-
-            message.schoolId = reader.int32();
-            continue;
-          }
-          case 4: {
-            if (tag !== 34) {
-              break;
-            }
-
-            message.startDate = reader.string();
-            continue;
-          }
-          case 5: {
-            if (tag !== 42) {
-              break;
-            }
-
-            message.endDate = reader.string();
-            continue;
-          }
+          message.page = reader.int32();
+          continue;
         }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
         }
-        reader.skip(tag & 7);
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.startDate = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.endDate = reader.string();
+          continue;
+        }
       }
-      return message;
-    },
-  };
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
 
 function createBaseSmsCreditChargeItem(): SmsCreditChargeItem {
   return { id: 0, schoolId: 0, chargeCredit: 0, chargeReason: "" };
 }
 
 export const SmsCreditChargeItem: MessageFns<SmsCreditChargeItem> = {
-  encode(
-    message: SmsCreditChargeItem,
-    writer: BinaryWriter = new BinaryWriter()
-  ): BinaryWriter {
+  encode(message: SmsCreditChargeItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== 0) {
       writer.uint32(8).int32(message.id);
     }
@@ -313,12 +415,8 @@ export const SmsCreditChargeItem: MessageFns<SmsCreditChargeItem> = {
     return writer;
   },
 
-  decode(
-    input: BinaryReader | Uint8Array,
-    length?: number
-  ): SmsCreditChargeItem {
-    const reader =
-      input instanceof BinaryReader ? input : new BinaryReader(input);
+  decode(input: BinaryReader | Uint8Array, length?: number): SmsCreditChargeItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSmsCreditChargeItem();
     while (reader.pos < end) {
@@ -383,214 +481,188 @@ export const SmsCreditChargeItem: MessageFns<SmsCreditChargeItem> = {
 };
 
 function createBaseGetCreditChargeListResponse(): GetCreditChargeListResponse {
-  return {
-    data: [],
-    totalCount: 0,
-    currentPage: 0,
-    limit: 0,
-    totalPage: 0,
-    hasNext: false,
-    hasPrev: false,
-  };
+  return { data: [], totalCount: 0, currentPage: 0, limit: 0, totalPage: 0, hasNext: false, hasPrev: false };
 }
 
-export const GetCreditChargeListResponse: MessageFns<GetCreditChargeListResponse> =
-  {
-    encode(
-      message: GetCreditChargeListResponse,
-      writer: BinaryWriter = new BinaryWriter()
-    ): BinaryWriter {
-      for (const v of message.data) {
-        SmsCreditChargeItem.encode(v!, writer.uint32(10).fork()).join();
-      }
-      if (message.totalCount !== 0) {
-        writer.uint32(16).int32(message.totalCount);
-      }
-      if (message.currentPage !== 0) {
-        writer.uint32(24).int32(message.currentPage);
-      }
-      if (message.limit !== 0) {
-        writer.uint32(32).int32(message.limit);
-      }
-      if (message.totalPage !== 0) {
-        writer.uint32(40).int32(message.totalPage);
-      }
-      if (message.hasNext !== false) {
-        writer.uint32(48).bool(message.hasNext);
-      }
-      if (message.hasPrev !== false) {
-        writer.uint32(56).bool(message.hasPrev);
-      }
-      return writer;
-    },
+export const GetCreditChargeListResponse: MessageFns<GetCreditChargeListResponse> = {
+  encode(message: GetCreditChargeListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.data) {
+      SmsCreditChargeItem.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.totalCount !== 0) {
+      writer.uint32(16).int32(message.totalCount);
+    }
+    if (message.currentPage !== 0) {
+      writer.uint32(24).int32(message.currentPage);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(32).int32(message.limit);
+    }
+    if (message.totalPage !== 0) {
+      writer.uint32(40).int32(message.totalPage);
+    }
+    if (message.hasNext !== false) {
+      writer.uint32(48).bool(message.hasNext);
+    }
+    if (message.hasPrev !== false) {
+      writer.uint32(56).bool(message.hasPrev);
+    }
+    return writer;
+  },
 
-    decode(
-      input: BinaryReader | Uint8Array,
-      length?: number
-    ): GetCreditChargeListResponse {
-      const reader =
-        input instanceof BinaryReader ? input : new BinaryReader(input);
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseGetCreditChargeListResponse();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 10) {
-              break;
-            }
-
-            message.data.push(
-              SmsCreditChargeItem.decode(reader, reader.uint32())
-            );
-            continue;
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditChargeListResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditChargeListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
           }
-          case 2: {
-            if (tag !== 16) {
-              break;
-            }
 
-            message.totalCount = reader.int32();
-            continue;
-          }
-          case 3: {
-            if (tag !== 24) {
-              break;
-            }
-
-            message.currentPage = reader.int32();
-            continue;
-          }
-          case 4: {
-            if (tag !== 32) {
-              break;
-            }
-
-            message.limit = reader.int32();
-            continue;
-          }
-          case 5: {
-            if (tag !== 40) {
-              break;
-            }
-
-            message.totalPage = reader.int32();
-            continue;
-          }
-          case 6: {
-            if (tag !== 48) {
-              break;
-            }
-
-            message.hasNext = reader.bool();
-            continue;
-          }
-          case 7: {
-            if (tag !== 56) {
-              break;
-            }
-
-            message.hasPrev = reader.bool();
-            continue;
-          }
+          message.data.push(SmsCreditChargeItem.decode(reader, reader.uint32()));
+          continue;
         }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalCount = reader.int32();
+          continue;
         }
-        reader.skip(tag & 7);
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.currentPage = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.totalPage = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.hasNext = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.hasPrev = reader.bool();
+          continue;
+        }
       }
-      return message;
-    },
-  };
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
 
 function createBaseGetCreditHistoryListRequest(): GetCreditHistoryListRequest {
   return { page: 0, limit: 0, schoolId: 0, startDate: "", endDate: "" };
 }
 
-export const GetCreditHistoryListRequest: MessageFns<GetCreditHistoryListRequest> =
-  {
-    encode(
-      message: GetCreditHistoryListRequest,
-      writer: BinaryWriter = new BinaryWriter()
-    ): BinaryWriter {
-      if (message.page !== 0) {
-        writer.uint32(8).int32(message.page);
-      }
-      if (message.limit !== 0) {
-        writer.uint32(16).int32(message.limit);
-      }
-      if (message.schoolId !== 0) {
-        writer.uint32(24).int32(message.schoolId);
-      }
-      if (message.startDate !== "") {
-        writer.uint32(34).string(message.startDate);
-      }
-      if (message.endDate !== "") {
-        writer.uint32(42).string(message.endDate);
-      }
-      return writer;
-    },
+export const GetCreditHistoryListRequest: MessageFns<GetCreditHistoryListRequest> = {
+  encode(message: GetCreditHistoryListRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.page !== 0) {
+      writer.uint32(8).int32(message.page);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(16).int32(message.limit);
+    }
+    if (message.schoolId !== 0) {
+      writer.uint32(24).int32(message.schoolId);
+    }
+    if (message.startDate !== "") {
+      writer.uint32(34).string(message.startDate);
+    }
+    if (message.endDate !== "") {
+      writer.uint32(42).string(message.endDate);
+    }
+    return writer;
+  },
 
-    decode(
-      input: BinaryReader | Uint8Array,
-      length?: number
-    ): GetCreditHistoryListRequest {
-      const reader =
-        input instanceof BinaryReader ? input : new BinaryReader(input);
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseGetCreditHistoryListRequest();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 8) {
-              break;
-            }
-
-            message.page = reader.int32();
-            continue;
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditHistoryListRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditHistoryListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
           }
-          case 2: {
-            if (tag !== 16) {
-              break;
-            }
 
-            message.limit = reader.int32();
-            continue;
-          }
-          case 3: {
-            if (tag !== 24) {
-              break;
-            }
-
-            message.schoolId = reader.int32();
-            continue;
-          }
-          case 4: {
-            if (tag !== 34) {
-              break;
-            }
-
-            message.startDate = reader.string();
-            continue;
-          }
-          case 5: {
-            if (tag !== 42) {
-              break;
-            }
-
-            message.endDate = reader.string();
-            continue;
-          }
+          message.page = reader.int32();
+          continue;
         }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
         }
-        reader.skip(tag & 7);
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.startDate = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.endDate = reader.string();
+          continue;
+        }
       }
-      return message;
-    },
-  };
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
 
 function createBaseSmsCreditHistoryItem(): SmsCreditHistoryItem {
   return {
@@ -605,10 +677,7 @@ function createBaseSmsCreditHistoryItem(): SmsCreditHistoryItem {
 }
 
 export const SmsCreditHistoryItem: MessageFns<SmsCreditHistoryItem> = {
-  encode(
-    message: SmsCreditHistoryItem,
-    writer: BinaryWriter = new BinaryWriter()
-  ): BinaryWriter {
+  encode(message: SmsCreditHistoryItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== 0) {
       writer.uint32(8).int32(message.id);
     }
@@ -639,12 +708,8 @@ export const SmsCreditHistoryItem: MessageFns<SmsCreditHistoryItem> = {
     return writer;
   },
 
-  decode(
-    input: BinaryReader | Uint8Array,
-    length?: number
-  ): SmsCreditHistoryItem {
-    const reader =
-      input instanceof BinaryReader ? input : new BinaryReader(input);
+  decode(input: BinaryReader | Uint8Array, length?: number): SmsCreditHistoryItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSmsCreditHistoryItem();
     while (reader.pos < end) {
@@ -733,198 +798,157 @@ export const SmsCreditHistoryItem: MessageFns<SmsCreditHistoryItem> = {
 };
 
 function createBaseGetCreditHistoryListResponse(): GetCreditHistoryListResponse {
-  return {
-    data: [],
-    totalCount: 0,
-    currentPage: 0,
-    limit: 0,
-    totalPage: 0,
-    hasNext: false,
-    hasPrev: false,
-  };
+  return { data: [], totalCount: 0, currentPage: 0, limit: 0, totalPage: 0, hasNext: false, hasPrev: false };
 }
 
-export const GetCreditHistoryListResponse: MessageFns<GetCreditHistoryListResponse> =
-  {
-    encode(
-      message: GetCreditHistoryListResponse,
-      writer: BinaryWriter = new BinaryWriter()
-    ): BinaryWriter {
-      for (const v of message.data) {
-        SmsCreditHistoryItem.encode(v!, writer.uint32(10).fork()).join();
-      }
-      if (message.totalCount !== 0) {
-        writer.uint32(16).int32(message.totalCount);
-      }
-      if (message.currentPage !== 0) {
-        writer.uint32(24).int32(message.currentPage);
-      }
-      if (message.limit !== 0) {
-        writer.uint32(32).int32(message.limit);
-      }
-      if (message.totalPage !== 0) {
-        writer.uint32(40).int32(message.totalPage);
-      }
-      if (message.hasNext !== false) {
-        writer.uint32(48).bool(message.hasNext);
-      }
-      if (message.hasPrev !== false) {
-        writer.uint32(56).bool(message.hasPrev);
-      }
-      return writer;
-    },
+export const GetCreditHistoryListResponse: MessageFns<GetCreditHistoryListResponse> = {
+  encode(message: GetCreditHistoryListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.data) {
+      SmsCreditHistoryItem.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.totalCount !== 0) {
+      writer.uint32(16).int32(message.totalCount);
+    }
+    if (message.currentPage !== 0) {
+      writer.uint32(24).int32(message.currentPage);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(32).int32(message.limit);
+    }
+    if (message.totalPage !== 0) {
+      writer.uint32(40).int32(message.totalPage);
+    }
+    if (message.hasNext !== false) {
+      writer.uint32(48).bool(message.hasNext);
+    }
+    if (message.hasPrev !== false) {
+      writer.uint32(56).bool(message.hasPrev);
+    }
+    return writer;
+  },
 
-    decode(
-      input: BinaryReader | Uint8Array,
-      length?: number
-    ): GetCreditHistoryListResponse {
-      const reader =
-        input instanceof BinaryReader ? input : new BinaryReader(input);
-      const end = length === undefined ? reader.len : reader.pos + length;
-      const message = createBaseGetCreditHistoryListResponse();
-      while (reader.pos < end) {
-        const tag = reader.uint32();
-        switch (tag >>> 3) {
-          case 1: {
-            if (tag !== 10) {
-              break;
-            }
-
-            message.data.push(
-              SmsCreditHistoryItem.decode(reader, reader.uint32())
-            );
-            continue;
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCreditHistoryListResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetCreditHistoryListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
           }
-          case 2: {
-            if (tag !== 16) {
-              break;
-            }
 
-            message.totalCount = reader.int32();
-            continue;
-          }
-          case 3: {
-            if (tag !== 24) {
-              break;
-            }
-
-            message.currentPage = reader.int32();
-            continue;
-          }
-          case 4: {
-            if (tag !== 32) {
-              break;
-            }
-
-            message.limit = reader.int32();
-            continue;
-          }
-          case 5: {
-            if (tag !== 40) {
-              break;
-            }
-
-            message.totalPage = reader.int32();
-            continue;
-          }
-          case 6: {
-            if (tag !== 48) {
-              break;
-            }
-
-            message.hasNext = reader.bool();
-            continue;
-          }
-          case 7: {
-            if (tag !== 56) {
-              break;
-            }
-
-            message.hasPrev = reader.bool();
-            continue;
-          }
+          message.data.push(SmsCreditHistoryItem.decode(reader, reader.uint32()));
+          continue;
         }
-        if ((tag & 7) === 4 || tag === 0) {
-          break;
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalCount = reader.int32();
+          continue;
         }
-        reader.skip(tag & 7);
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.currentPage = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.totalPage = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.hasNext = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.hasPrev = reader.bool();
+          continue;
+        }
       }
-      return message;
-    },
-  };
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
 
 export interface SmsManagementServiceClient {
-  chargeCredit(
-    request: ChargeCreditRequest,
-    metadata?: Metadata
-  ): Observable<ChargeCreditResponse>;
+  chargeCredit(request: ChargeCreditRequest, metadata?: Metadata): Observable<ChargeCreditResponse>;
+
+  getCreditRemain(request: GetCreditRemainRequest, metadata?: Metadata): Observable<GetCreditRemainResponse>;
 
   getCreditChargeList(
     request: GetCreditChargeListRequest,
-    metadata?: Metadata
+    metadata?: Metadata,
   ): Observable<GetCreditChargeListResponse>;
 
   getCreditHistoryList(
     request: GetCreditHistoryListRequest,
-    metadata?: Metadata
+    metadata?: Metadata,
   ): Observable<GetCreditHistoryListResponse>;
 }
 
 export interface SmsManagementServiceController {
   chargeCredit(
     request: ChargeCreditRequest,
-    metadata?: Metadata
-  ):
-    | Promise<ChargeCreditResponse>
-    | Observable<ChargeCreditResponse>
-    | ChargeCreditResponse;
+    metadata?: Metadata,
+  ): Promise<ChargeCreditResponse> | Observable<ChargeCreditResponse> | ChargeCreditResponse;
+
+  getCreditRemain(
+    request: GetCreditRemainRequest,
+    metadata?: Metadata,
+  ): Promise<GetCreditRemainResponse> | Observable<GetCreditRemainResponse> | GetCreditRemainResponse;
 
   getCreditChargeList(
     request: GetCreditChargeListRequest,
-    metadata?: Metadata
-  ):
-    | Promise<GetCreditChargeListResponse>
-    | Observable<GetCreditChargeListResponse>
-    | GetCreditChargeListResponse;
+    metadata?: Metadata,
+  ): Promise<GetCreditChargeListResponse> | Observable<GetCreditChargeListResponse> | GetCreditChargeListResponse;
 
   getCreditHistoryList(
     request: GetCreditHistoryListRequest,
-    metadata?: Metadata
-  ):
-    | Promise<GetCreditHistoryListResponse>
-    | Observable<GetCreditHistoryListResponse>
-    | GetCreditHistoryListResponse;
+    metadata?: Metadata,
+  ): Promise<GetCreditHistoryListResponse> | Observable<GetCreditHistoryListResponse> | GetCreditHistoryListResponse;
 }
 
 export function SmsManagementServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      "chargeCredit",
-      "getCreditChargeList",
-      "getCreditHistoryList",
-    ];
+    const grpcMethods: string[] = ["chargeCredit", "getCreditRemain", "getCreditChargeList", "getCreditHistoryList"];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method
-      );
-      GrpcMethod("SmsManagementService", method)(
-        constructor.prototype[method],
-        method,
-        descriptor
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("SmsManagementService", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(
-        constructor.prototype,
-        method
-      );
-      GrpcStreamMethod("SmsManagementService", method)(
-        constructor.prototype[method],
-        method,
-        descriptor
-      );
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("SmsManagementService", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
@@ -937,14 +961,22 @@ export const SmsManagementServiceService = {
     path: "/super_school.SmsManagementService/ChargeCredit" as const,
     requestStream: false as const,
     responseStream: false as const,
-    requestSerialize: (value: ChargeCreditRequest): Buffer =>
-      Buffer.from(ChargeCreditRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer): ChargeCreditRequest =>
-      ChargeCreditRequest.decode(value),
+    requestSerialize: (value: ChargeCreditRequest): Buffer => Buffer.from(ChargeCreditRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): ChargeCreditRequest => ChargeCreditRequest.decode(value),
     responseSerialize: (value: ChargeCreditResponse): Buffer =>
       Buffer.from(ChargeCreditResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): ChargeCreditResponse =>
-      ChargeCreditResponse.decode(value),
+    responseDeserialize: (value: Buffer): ChargeCreditResponse => ChargeCreditResponse.decode(value),
+  },
+  getCreditRemain: {
+    path: "/super_school.SmsManagementService/GetCreditRemain" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: GetCreditRemainRequest): Buffer =>
+      Buffer.from(GetCreditRemainRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): GetCreditRemainRequest => GetCreditRemainRequest.decode(value),
+    responseSerialize: (value: GetCreditRemainResponse): Buffer =>
+      Buffer.from(GetCreditRemainResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): GetCreditRemainResponse => GetCreditRemainResponse.decode(value),
   },
   getCreditChargeList: {
     path: "/super_school.SmsManagementService/GetCreditChargeList" as const,
@@ -952,12 +984,10 @@ export const SmsManagementServiceService = {
     responseStream: false as const,
     requestSerialize: (value: GetCreditChargeListRequest): Buffer =>
       Buffer.from(GetCreditChargeListRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer): GetCreditChargeListRequest =>
-      GetCreditChargeListRequest.decode(value),
+    requestDeserialize: (value: Buffer): GetCreditChargeListRequest => GetCreditChargeListRequest.decode(value),
     responseSerialize: (value: GetCreditChargeListResponse): Buffer =>
       Buffer.from(GetCreditChargeListResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): GetCreditChargeListResponse =>
-      GetCreditChargeListResponse.decode(value),
+    responseDeserialize: (value: Buffer): GetCreditChargeListResponse => GetCreditChargeListResponse.decode(value),
   },
   getCreditHistoryList: {
     path: "/super_school.SmsManagementService/GetCreditHistoryList" as const,
@@ -965,26 +995,18 @@ export const SmsManagementServiceService = {
     responseStream: false as const,
     requestSerialize: (value: GetCreditHistoryListRequest): Buffer =>
       Buffer.from(GetCreditHistoryListRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer): GetCreditHistoryListRequest =>
-      GetCreditHistoryListRequest.decode(value),
+    requestDeserialize: (value: Buffer): GetCreditHistoryListRequest => GetCreditHistoryListRequest.decode(value),
     responseSerialize: (value: GetCreditHistoryListResponse): Buffer =>
       Buffer.from(GetCreditHistoryListResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): GetCreditHistoryListResponse =>
-      GetCreditHistoryListResponse.decode(value),
+    responseDeserialize: (value: Buffer): GetCreditHistoryListResponse => GetCreditHistoryListResponse.decode(value),
   },
 } as const;
 
-export interface SmsManagementServiceServer
-  extends UntypedServiceImplementation {
+export interface SmsManagementServiceServer extends UntypedServiceImplementation {
   chargeCredit: handleUnaryCall<ChargeCreditRequest, ChargeCreditResponse>;
-  getCreditChargeList: handleUnaryCall<
-    GetCreditChargeListRequest,
-    GetCreditChargeListResponse
-  >;
-  getCreditHistoryList: handleUnaryCall<
-    GetCreditHistoryListRequest,
-    GetCreditHistoryListResponse
-  >;
+  getCreditRemain: handleUnaryCall<GetCreditRemainRequest, GetCreditRemainResponse>;
+  getCreditChargeList: handleUnaryCall<GetCreditChargeListRequest, GetCreditChargeListResponse>;
+  getCreditHistoryList: handleUnaryCall<GetCreditHistoryListRequest, GetCreditHistoryListResponse>;
 }
 
 interface MessageFns<T> {

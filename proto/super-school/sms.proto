@@ -4,6 +4,7 @@ package super_school;
 
 service SmsManagementService {
   rpc ChargeCredit(ChargeCreditRequest) returns (ChargeCreditResponse);
+  rpc GetCreditRemain(GetCreditRemainRequest) returns (GetCreditRemainResponse);
   rpc GetCreditChargeList(GetCreditChargeListRequest) returns (GetCreditChargeListResponse);
   rpc GetCreditHistoryList(GetCreditHistoryListRequest) returns (GetCreditHistoryListResponse);
 }
@@ -17,6 +18,19 @@ message ChargeCreditRequest {
 
 message ChargeCreditResponse {
   bool success = 1;
+}
+
+// --- SMS 크레딧 잔액 조회 ---
+message GetCreditRemainRequest {
+  int32 schoolId = 1;
+}
+
+message GetCreditRemainResponse {
+  optional int32 id = 1;
+  optional string createdAt = 2;
+  optional string updatedAt = 3;
+  int32 schoolId = 4;
+  int32 remainCredit = 5;
 }
 
 // --- SMS 크레딧 충전 이력 조회 ---
