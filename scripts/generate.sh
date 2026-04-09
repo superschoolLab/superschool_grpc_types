@@ -31,3 +31,6 @@ protoc \
 
 echo "✓ Generated TypeScript files in $OUT_DIR"
 ls -la "$OUT_DIR"
+
+# Generate clients.ts from proto service definitions
+node "$SCRIPT_DIR/generate-clients.js"

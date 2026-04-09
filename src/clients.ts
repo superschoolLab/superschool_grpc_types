@@ -1,47 +1,44 @@
 /**
- * gRPC 클라이언트 인터페이스 (PascalCase 메서드명)
+ * 이 파일은 scripts/generate-clients.js에 의해 자동 생성됩니다.
+ * 직접 수정하지 마세요. proto 파일 수정 후 npm run generate를 실행하세요.
  *
- * NestJS ClientGrpc.getService()에서 proto-loader keepCase: true 설정 시
- * 런타임 프록시의 메서드명이 PascalCase로 생성됨.
- * ts-proto는 camelCase로 생성하므로, consumer용 PascalCase 인터페이스를 별도 제공.
+ * gRPC 클라이언트 인터페이스 (proto 원본 메서드명 유지)
+ * NestJS proto-loader keepCase: true 설정과 호환됩니다.
  */
 import type { Metadata } from "@grpc/grpc-js";
 import type { Observable } from "rxjs";
 import type {
+  FindNewsletterV2ListRequest,
+  FindNewsletterV2ListResponse,
+  FindNewsletterV2SubmissionListRequest,
+  FindNewsletterV2SubmissionListResponse,
+  FindOneByOptionsRequest,
+  FindOneByOptionsResponse,
+  FindParentListRequest,
+  FindParentListResponse,
   FindStudentListRequest,
   FindStudentListResponse,
   FindTeacherListRequest,
   FindTeacherListResponse,
-  FindParentListRequest,
-  FindParentListResponse,
-  FindOneByOptionsRequest,
-  FindOneByOptionsResponse,
-  ResetPasswordRequest,
-  ResetPasswordResponse,
-  ResetPasswordAttemptCountRequest,
-  ResetPasswordAttemptCountResponse,
-  FindUnifiedUserListRequest,
-  FindUnifiedUserListResponse,
   FindUnifiedUserDetailRequest,
   FindUnifiedUserDetailResponse,
-  FindNewsletterV2SubmissionListRequest,
-  FindNewsletterV2SubmissionListResponse,
-  FindNewsletterV2ListRequest,
-  FindNewsletterV2ListResponse,
+  FindUnifiedUserListRequest,
+  FindUnifiedUserListResponse,
+  ResetPasswordAttemptCountRequest,
+  ResetPasswordAttemptCountResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
 } from "./index";
 
-export interface StudentUserGrpcClient {
-  FindStudentList(
-    request: FindStudentListRequest,
+export interface NewsletterV2GrpcClient {
+  findSubmissionEndTime(
+    request: FindNewsletterV2SubmissionListRequest,
     metadata?: Metadata
-  ): Observable<FindStudentListResponse>;
-}
-
-export interface TeacherUserGrpcClient {
-  FindTeacherList(
-    request: FindTeacherListRequest,
+  ): Observable<FindNewsletterV2SubmissionListResponse>;
+  findNewsletterV2List(
+    request: FindNewsletterV2ListRequest,
     metadata?: Metadata
-  ): Observable<FindTeacherListResponse>;
+  ): Observable<FindNewsletterV2ListResponse>;
 }
 
 export interface ParentUserGrpcClient {
@@ -49,6 +46,13 @@ export interface ParentUserGrpcClient {
     request: FindParentListRequest,
     metadata?: Metadata
   ): Observable<FindParentListResponse>;
+}
+
+export interface StudentUserGrpcClient {
+  FindStudentList(
+    request: FindStudentListRequest,
+    metadata?: Metadata
+  ): Observable<FindStudentListResponse>;
 }
 
 export interface SuperSchoolUserGrpcClient {
@@ -66,6 +70,13 @@ export interface SuperSchoolUserGrpcClient {
   ): Observable<ResetPasswordAttemptCountResponse>;
 }
 
+export interface TeacherUserGrpcClient {
+  FindTeacherList(
+    request: FindTeacherListRequest,
+    metadata?: Metadata
+  ): Observable<FindTeacherListResponse>;
+}
+
 export interface UnifiedUserGrpcClient {
   FindUnifiedUserList(
     request: FindUnifiedUserListRequest,
@@ -75,15 +86,4 @@ export interface UnifiedUserGrpcClient {
     request: FindUnifiedUserDetailRequest,
     metadata?: Metadata
   ): Observable<FindUnifiedUserDetailResponse>;
-}
-
-export interface NewsletterV2GrpcClient {
-  findSubmissionEndTime(
-    request: FindNewsletterV2SubmissionListRequest,
-    metadata?: Metadata
-  ): Observable<FindNewsletterV2SubmissionListResponse>;
-  findNewsletterV2List(
-    request: FindNewsletterV2ListRequest,
-    metadata?: Metadata
-  ): Observable<FindNewsletterV2ListResponse>;
 }

@@ -20,10 +20,11 @@ superschool_grpc_types/
 ├── generated/                  # ts-proto 자동 생성 (커밋 대상)
 ├── src/
 │   ├── index.ts                # barrel export + proto 경로 헬퍼
-│   └── clients.ts              # PascalCase 클라이언트 인터페이스
+│   └── clients.ts              # 클라이언트 인터페이스 (자동 생성)
 ├── dist/                       # 빌드 결과 (gitignore)
 └── scripts/
-    └── generate.sh             # proto → TypeScript 생성 스크립트
+    ├── generate.sh             # proto → TypeScript 생성 스크립트
+    └── generate-clients.js     # proto → 클라이언트 인터페이스 생성
 ```
 
 ## 제공하는 gRPC 서비스
@@ -42,12 +43,17 @@ superschool_grpc_types/
 Git 의존성으로 설치:
 
 ```bash
-# npm
-npm install github:superschoolLab/superschool_grpc_types#v0.1.0
-
 # pnpm
-pnpm add github:superschoolLab/superschool_grpc_types#v0.1.0
+pnpm add "https://github.com/superschoolLab/superschool_grpc_types.git"
+
+# yarn
+yarn add "https://github.com/superschoolLab/superschool_grpc_types.git"
+
+# npm
+npm install "https://github.com/superschoolLab/superschool_grpc_types.git"
 ```
+
+> Docker 환경에서는 Dockerfile에 `git` 설치가 필요합니다: `RUN apk add --no-cache git`
 
 ### peerDependencies
 
@@ -179,31 +185,60 @@ brew install protobuf
 apt install protobuf-compiler
 ```
 
-### 타입 재생성
-
-proto 파일 수정 후:
+### 수정 → 배포 흐름
 
 ```bash
-npm install           # 최초 1회
-npm run generate      # proto → TypeScript 생성
-npm run build         # TypeScript 빌드
+# 1. proto 파일 수정
+
+# 2. 코드 생성 + 빌드
+pnpm run generate      # generated/ + src/clients.ts 자동 생성
+pnpm run build         # dist/ 빌드
+
+# 3. 커밋
+git add .
+git commit -m "변경 내용"
+
+# 4. (선택) 버전 올리기
+pnpm version patch     # 0.1.0 → 0.1.1, 자동 커밋 + 태그
+
+# 5. 푸시
+git push
 ```
 
-### 버전 배포
+### consumer 업데이트
+
+현재 각 백엔드(consumer)는 태그 없이 레포를 참조하고 있어서, 재설치 시 **자동으로 최신 커밋**을 가져옵니다.
+
+```json
+// package.json — 태그 없이 레포 직접 참조
+"@superschool/grpc-types": "https://github.com/superschoolLab/superschool_grpc_types.git"
+```
+
+따라서 이 레포에 push만 하면 consumer에서 재설치할 때 최신이 반영됩니다:
 
 ```bash
-npm version patch     # 0.1.0 → 0.1.1
-git push --tags       # consumer에서 태그로 참조
+# consumer에서 최신 버전 가져오기
+pnpm remove @superschool/grpc-types && pnpm add "https://github.com/superschoolLab/superschool_grpc_types.git"
 ```
 
-consumer 업데이트:
+> 나중에 버전을 고정하고 싶다면 태그를 사용할 수 있습니다:
+> ```json
+> "@superschool/grpc-types": "https://github.com/superschoolLab/superschool_grpc_types.git#v0.2.0"
+> ```
 
-```bash
-npm install github:superschoolLab/superschool_grpc_types#v0.1.1
-```
+## 자동 생성 파일
+
+`pnpm run generate` 실행 시 아래 파일이 자동 생성됩니다:
+
+| 파일 | 생성 도구 | 내용 |
+|------|----------|------|
+| `generated/*.ts` | ts-proto (protoc) | 메시지 인터페이스 + encode/decode |
+| `src/clients.ts` | generate-clients.js | 클라이언트 인터페이스 (proto 원본 메서드명 유지) |
+
+> `generated/`와 `src/clients.ts`는 직접 수정하지 마세요. proto 수정 후 `pnpm run generate`로 재생성합니다.
 
 ## 참고: 클라이언트 인터페이스 메서드명 규칙
 
-- `src/clients.ts`의 클라이언트 인터페이스는 **PascalCase** 메서드명 사용 (`FindStudentList`)
-- NestJS proto-loader `keepCase: true` 설정 시 런타임 프록시가 PascalCase로 동작하기 때문
-- `generated/`의 ts-proto 생성 인터페이스는 camelCase (`findStudentList`) — 서버 컨트롤러 데코레이터용
+- `src/clients.ts`의 클라이언트 인터페이스는 proto에 정의된 **원본 메서드명**을 그대로 사용
+- NestJS proto-loader `keepCase: true` 설정 시 런타임 프록시가 원본 casing으로 동작하기 때문
+- `generated/`의 ts-proto 생성 인터페이스는 camelCase — 서버 컨트롤러 데코레이터용
