@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package super_school;
+
+service SmsManagementService {
+  rpc ChargeCredit(ChargeCreditRequest) returns (ChargeCreditResponse);
+  rpc GetCreditChargeList(GetCreditChargeListRequest) returns (GetCreditChargeListResponse);
+  rpc GetCreditHistoryList(GetCreditHistoryListRequest) returns (GetCreditHistoryListResponse);
+}
+
+// --- SMS 크레딧 충전 ---
+message ChargeCreditRequest {
+  int32 schoolId = 1;
+  int32 chargeCredit = 2;
+  optional string chargeReason = 3;
+}
+
+message ChargeCreditResponse {
+  bool success = 1;
+}
+
+// --- SMS 크레딧 충전 이력 조회 ---
+message GetCreditChargeListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 schoolId = 3;
+  string startDate = 4;
+  string endDate = 5;
+}
+
+message SmsCreditChargeItem {
+  int32 id = 1;
+  optional string createdAt = 2;
+  optional string updatedAt = 3;
+  int32 schoolId = 4;
+  int32 chargeCredit = 5;
+  string chargeReason = 6;
+}
+
+message GetCreditChargeListResponse {
+  repeated SmsCreditChargeItem data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}
+
+// --- SMS 크레딧 사용 이력 조회 (일별 집계) ---
+message GetCreditHistoryListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 schoolId = 3;
+  string startDate = 4;
+  string endDate = 5;
+}
+
+message SmsCreditHistoryItem {
+  int32 id = 1;
+  optional string createdAt = 2;
+  optional string updatedAt = 3;
+  string calculateAt = 4;
+  int32 schoolId = 5;
+  int32 chargeCredit = 6;
+  int32 usageCredit = 7;
+  int32 remainCredit = 8;
+  int32 accumulateUsageCredit = 9;
+}
+
+message GetCreditHistoryListResponse {
+  repeated SmsCreditHistoryItem data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}

@@ -228,14 +228,16 @@ pnpm remove @superschool/grpc-types && pnpm add "https://github.com/superschoolL
 
 ## 자동 생성 파일
 
-`pnpm run generate` 실행 시 아래 파일이 자동 생성됩니다:
+`pnpm run generate` 실행 시 아래 파일이 **전부 자동 생성**됩니다. 직접 수정하지 마세요.
 
 | 파일 | 생성 도구 | 내용 |
 |------|----------|------|
 | `generated/*.ts` | ts-proto (protoc) | 메시지 인터페이스 + encode/decode |
 | `src/clients.ts` | generate-clients.js | 클라이언트 인터페이스 (proto 원본 메서드명 유지) |
+| `src/index.ts` | generate-clients.js | generated/*.ts re-export + proto 경로 헬퍼 |
+| `proto/all-protos.proto` | generate-clients.js | 런타임 proto-loader용 aggregator |
 
-> `generated/`와 `src/clients.ts`는 직접 수정하지 마세요. proto 수정 후 `pnpm run generate`로 재생성합니다.
+> 새 proto 파일을 추가할 때도 `proto/super-school/` 아래에 파일만 만들면 나머지는 `pnpm run generate`가 전부 처리합니다.
 
 ## 참고: 클라이언트 인터페이스 메서드명 규칙
 

@@ -1,16 +1,23 @@
 #!/usr/bin/env node
 /**
- * proto 파일에서 gRPC 클라이언트 인터페이스(clients.ts)를 자동 생성하는 스크립트.
+ * proto 파일을 스캔하여 아래 파일들을 자동 생성하는 스크립트.
  *
- * proto의 service/rpc 정의를 파싱하여:
- * - {ServiceName} → {ServiceName에서 "Service" 제거}GrpcClient 인터페이스 생성
- * - rpc 메서드명은 proto에 정의된 casing 그대로 유지 (keepCase: true 호환)
+ * 생성 대상:
+ * 1. src/clients.ts — gRPC 클라이언트 인터페이스 (proto 원본 메서드명 유지)
+ * 2. src/index.ts — 모든 generated/*.ts re-export + proto 경로 헬퍼
+ * 3. proto/all-protos.proto — 서비스 aggregator (런타임 proto-loader용)
+ *
+ * 이 파일들은 직접 수정하지 마세요. proto 수정 후 npm run generate를 실행하세요.
  */
 const fs = require('fs');
 const path = require('path');
 
-const PROTO_DIR = path.join(__dirname, '..', 'proto', 'super-school');
-const OUTPUT_FILE = path.join(__dirname, '..', 'src', 'clients.ts');
+const ROOT_DIR = path.join(__dirname, '..');
+const PROTO_DIR = path.join(ROOT_DIR, 'proto', 'super-school');
+const SRC_DIR = path.join(ROOT_DIR, 'src');
+const ALL_PROTOS_FILE = path.join(ROOT_DIR, 'proto', 'all-protos.proto');
+const CLIENTS_FILE = path.join(SRC_DIR, 'clients.ts');
+const INDEX_FILE = path.join(SRC_DIR, 'index.ts');
 
 /**
  * proto 파일에서 service 블록과 rpc 정의를 파싱
@@ -19,7 +26,6 @@ function parseProtoFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf-8');
   const services = [];
 
-  // service 블록 매칭 (중첩 없는 단순 구조)
   const serviceRegex = /service\s+(\w+)\s*\{([^}]+)\}/g;
   let serviceMatch;
 
@@ -28,7 +34,6 @@ function parseProtoFile(filePath) {
     const serviceBody = serviceMatch[2];
     const rpcs = [];
 
-    // rpc 정의 매칭 (멀티라인 대응)
     const rpcRegex = /rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)/g;
     let rpcMatch;
 
@@ -58,7 +63,6 @@ function toClientInterfaceName(serviceName) {
  * clients.ts 파일 내용 생성
  */
 function generateClientsTs(allServices) {
-  // 모든 request/response 타입 수집
   const importTypes = new Set();
   for (const service of allServices) {
     for (const rpc of service.rpcs) {
@@ -70,8 +74,6 @@ function generateClientsTs(allServices) {
   const sortedImports = Array.from(importTypes).sort();
 
   let output = '';
-
-  // 파일 헤더
   output += '/**\n';
   output += ' * 이 파일은 scripts/generate-clients.js에 의해 자동 생성됩니다.\n';
   output += ' * 직접 수정하지 마세요. proto 파일 수정 후 npm run generate를 실행하세요.\n';
@@ -79,8 +81,6 @@ function generateClientsTs(allServices) {
   output += ' * gRPC 클라이언트 인터페이스 (proto 원본 메서드명 유지)\n';
   output += ' * NestJS proto-loader keepCase: true 설정과 호환됩니다.\n';
   output += ' */\n';
-
-  // import 문
   output += "import type { Metadata } from '@grpc/grpc-js';\n";
   output += "import type { Observable } from 'rxjs';\n";
   output += 'import type {\n';
@@ -90,15 +90,12 @@ function generateClientsTs(allServices) {
   output += "} from './index';\n";
   output += '\n';
 
-  // 인터페이스 생성
   for (const service of allServices) {
     const interfaceName = toClientInterfaceName(service.serviceName);
     output += `export interface ${interfaceName} {\n`;
-
     for (const rpc of service.rpcs) {
       output += `  ${rpc.methodName}(request: ${rpc.requestType}, metadata?: Metadata): Observable<${rpc.responseType}>;\n`;
     }
-
     output += '}\n';
     output += '\n';
   }
@@ -106,8 +103,57 @@ function generateClientsTs(allServices) {
   return output.trimEnd() + '\n';
 }
 
+/**
+ * src/index.ts 파일 내용 생성
+ * generated/*.ts 전부 re-export + clients.ts + proto 경로 헬퍼
+ */
+function generateIndexTs(protoBasenames) {
+  let output = '';
+  output += '// 이 파일은 scripts/generate-clients.js에 의해 자동 생성됩니다.\n';
+  output += '// 직접 수정하지 마세요. proto 파일 수정 후 npm run generate를 실행하세요.\n';
+  output += '\n';
+  output += '// 자동 생성된 메시지 타입 re-export\n';
+  for (const base of protoBasenames) {
+    output += `export * from '../generated/${base}';\n`;
+  }
+  output += '\n';
+  output += '// 클라이언트 인터페이스 (keepCase: true 환경용)\n';
+  output += "export * from './clients';\n";
+  output += '\n';
+  output += '// proto 경로 헬퍼\n';
+  output += "import { join } from 'path';\n";
+  output += '\n';
+  output += "export const PROTO_DIR = join(__dirname, '..', '..', 'proto');\n";
+  output += "export const ALL_PROTOS_PATH = join(PROTO_DIR, 'all-protos.proto');\n";
+  output += "export const PROTO_INCLUDE_DIRS = [PROTO_DIR, join(PROTO_DIR, 'super-school')];\n";
+  output += "export const SUPER_SCHOOL_PACKAGE = 'super_school';\n";
+  return output;
+}
+
+/**
+ * proto/all-protos.proto 파일 내용 생성
+ * 런타임 proto-loader용 aggregator
+ */
+function generateAllProtosFile(protoBasenames) {
+  let output = '';
+  output += '// 이 파일은 scripts/generate-clients.js에 의해 자동 생성됩니다.\n';
+  output += '// 직접 수정하지 마세요. proto 파일 추가 후 npm run generate를 실행하세요.\n';
+  output += '\n';
+  output += 'syntax = "proto3";\n';
+  output += '\n';
+  for (const base of protoBasenames) {
+    output += `import "super-school/${base}.proto";\n`;
+  }
+  return output;
+}
+
 // 메인 실행
-const protoFiles = fs.readdirSync(PROTO_DIR).filter((f) => f.endsWith('.proto'));
+const protoFiles = fs
+  .readdirSync(PROTO_DIR)
+  .filter((f) => f.endsWith('.proto'))
+  .sort();
+
+const protoBasenames = protoFiles.map((f) => f.replace(/\.proto$/, ''));
 const allServices = [];
 
 for (const file of protoFiles) {
@@ -116,12 +162,21 @@ for (const file of protoFiles) {
   allServices.push(...services);
 }
 
-// 서비스명 알파벳 순 정렬
 allServices.sort((a, b) => a.serviceName.localeCompare(b.serviceName));
 
-const output = generateClientsTs(allServices);
-fs.writeFileSync(OUTPUT_FILE, output, 'utf-8');
+// 1. src/clients.ts 생성
+fs.writeFileSync(CLIENTS_FILE, generateClientsTs(allServices), 'utf-8');
+console.log(`✓ Generated ${path.relative(ROOT_DIR, CLIENTS_FILE)}`);
 
-console.log(`✓ Generated ${OUTPUT_FILE}`);
+// 2. src/index.ts 생성
+fs.writeFileSync(INDEX_FILE, generateIndexTs(protoBasenames), 'utf-8');
+console.log(`✓ Generated ${path.relative(ROOT_DIR, INDEX_FILE)}`);
+
+// 3. proto/all-protos.proto 생성
+fs.writeFileSync(ALL_PROTOS_FILE, generateAllProtosFile(protoBasenames), 'utf-8');
+console.log(`✓ Generated ${path.relative(ROOT_DIR, ALL_PROTOS_FILE)}`);
+
+console.log('');
+console.log(`  Proto files: ${protoFiles.join(', ')}`);
 console.log(`  Services: ${allServices.map((s) => s.serviceName).join(', ')}`);
 console.log(`  Total RPCs: ${allServices.reduce((sum, s) => sum + s.rpcs.length, 0)}`);

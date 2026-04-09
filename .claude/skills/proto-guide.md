@@ -91,34 +91,29 @@ message FindExampleDetailResponse {
 
 ## 새 서비스 추가 절차
 
-1. `proto/super-school/{서비스명}.proto` 파일 생성
-2. `proto/all-protos.proto`에 import 추가:
-   ```protobuf
-   import "super-school/{서비스명}.proto";
-   ```
-3. `scripts/generate.sh`의 protoc 명령에 proto 파일 추가:
+1. `proto/super-school/{서비스명}.proto` 파일 생성 (위 템플릿 참고)
+2. 코드 생성 및 빌드:
    ```bash
-   "$PROTO_DIR/{서비스명}.proto"
+   pnpm run generate   # generated/, clients.ts, index.ts, all-protos.proto 자동 갱신
+   pnpm run build      # dist/ 빌드
    ```
-4. 코드 생성 및 빌드:
-   ```bash
-   npm run generate   # generated/ + src/clients.ts 자동 생성
-   npm run build      # dist/ 빌드
-   ```
-5. 커밋 & 푸시
+3. 커밋 & 푸시
+
+> **그 외 파일은 건드릴 필요 없습니다.** `all-protos.proto`, `scripts/generate.sh`, `src/index.ts`, `src/clients.ts`는 모두 proto 파일을 스캔해서 자동 생성됩니다.
 
 ## 기존 서비스에 RPC 추가 절차
 
 1. 해당 `.proto` 파일에 rpc + message 추가
-2. `npm run generate` 실행 (generated/ + clients.ts 자동 갱신)
-3. `npm run build`
-4. 커밋 & 푸시
+2. `pnpm run generate && pnpm run build`
+3. 커밋 & 푸시
 
 ## 자동 생성되는 파일
+
+`pnpm run generate` 실행 시 아래 파일이 전부 자동 생성됩니다. **직접 수정하지 마세요.**
 
 | 파일 | 생성 도구 | 내용 |
 |------|----------|------|
 | `generated/*.ts` | ts-proto (protoc) | 메시지 인터페이스 + encode/decode + camelCase 서비스 클라이언트 |
 | `src/clients.ts` | generate-clients.js | proto 원본 casing 클라이언트 인터페이스 (consumer용) |
-
-**주의: `generated/`와 `src/clients.ts`는 직접 수정하지 마세요.** proto 수정 후 `npm run generate`로 재생성합니다.
+| `src/index.ts` | generate-clients.js | generated/*.ts 재export + proto 경로 헬퍼 |
+| `proto/all-protos.proto` | generate-clients.js | 런타임 proto-loader용 aggregator |

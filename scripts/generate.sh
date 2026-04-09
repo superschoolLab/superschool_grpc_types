@@ -10,8 +10,10 @@ OUT_DIR="$ROOT_DIR/generated"
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
+# proto 파일 자동 수집 (proto/super-school/*.proto)
+PROTO_FILES=("$PROTO_DIR"/*.proto)
+
 # Generate TypeScript from proto files
-# all-protos.proto is only for runtime aggregation, not for code generation
 protoc \
   --plugin="$ROOT_DIR/node_modules/.bin/protoc-gen-ts_proto" \
   --ts_proto_out="$OUT_DIR" \
@@ -22,15 +24,10 @@ protoc \
   --ts_proto_opt=addGrpcMetadata=true \
   --ts_proto_opt=exportCommonSymbols=false \
   -I "$PROTO_DIR" \
-  "$PROTO_DIR/user.proto" \
-  "$PROTO_DIR/student-user.proto" \
-  "$PROTO_DIR/teacher-user.proto" \
-  "$PROTO_DIR/parent-user.proto" \
-  "$PROTO_DIR/unified-user.proto" \
-  "$PROTO_DIR/newsletter-v2.proto"
+  "${PROTO_FILES[@]}"
 
 echo "✓ Generated TypeScript files in $OUT_DIR"
 ls -la "$OUT_DIR"
 
-# Generate clients.ts from proto service definitions
+# Generate clients.ts + src/index.ts + proto/all-protos.proto from proto definitions
 node "$SCRIPT_DIR/generate-clients.js"

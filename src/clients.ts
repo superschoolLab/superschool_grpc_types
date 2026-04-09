@@ -5,9 +5,11 @@
  * gRPC 클라이언트 인터페이스 (proto 원본 메서드명 유지)
  * NestJS proto-loader keepCase: true 설정과 호환됩니다.
  */
-import type { Metadata } from "@grpc/grpc-js";
-import type { Observable } from "rxjs";
+import type { Metadata } from '@grpc/grpc-js';
+import type { Observable } from 'rxjs';
 import type {
+  ChargeCreditRequest,
+  ChargeCreditResponse,
   FindNewsletterV2ListRequest,
   FindNewsletterV2ListResponse,
   FindNewsletterV2SubmissionListRequest,
@@ -24,66 +26,46 @@ import type {
   FindUnifiedUserDetailResponse,
   FindUnifiedUserListRequest,
   FindUnifiedUserListResponse,
+  GetCreditChargeListRequest,
+  GetCreditChargeListResponse,
+  GetCreditHistoryListRequest,
+  GetCreditHistoryListResponse,
   ResetPasswordAttemptCountRequest,
   ResetPasswordAttemptCountResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-} from "./index";
+} from './index';
 
 export interface NewsletterV2GrpcClient {
-  findSubmissionEndTime(
-    request: FindNewsletterV2SubmissionListRequest,
-    metadata?: Metadata
-  ): Observable<FindNewsletterV2SubmissionListResponse>;
-  findNewsletterV2List(
-    request: FindNewsletterV2ListRequest,
-    metadata?: Metadata
-  ): Observable<FindNewsletterV2ListResponse>;
+  findSubmissionEndTime(request: FindNewsletterV2SubmissionListRequest, metadata?: Metadata): Observable<FindNewsletterV2SubmissionListResponse>;
+  findNewsletterV2List(request: FindNewsletterV2ListRequest, metadata?: Metadata): Observable<FindNewsletterV2ListResponse>;
 }
 
 export interface ParentUserGrpcClient {
-  FindParentList(
-    request: FindParentListRequest,
-    metadata?: Metadata
-  ): Observable<FindParentListResponse>;
+  FindParentList(request: FindParentListRequest, metadata?: Metadata): Observable<FindParentListResponse>;
+}
+
+export interface SmsManagementGrpcClient {
+  ChargeCredit(request: ChargeCreditRequest, metadata?: Metadata): Observable<ChargeCreditResponse>;
+  GetCreditChargeList(request: GetCreditChargeListRequest, metadata?: Metadata): Observable<GetCreditChargeListResponse>;
+  GetCreditHistoryList(request: GetCreditHistoryListRequest, metadata?: Metadata): Observable<GetCreditHistoryListResponse>;
 }
 
 export interface StudentUserGrpcClient {
-  FindStudentList(
-    request: FindStudentListRequest,
-    metadata?: Metadata
-  ): Observable<FindStudentListResponse>;
+  FindStudentList(request: FindStudentListRequest, metadata?: Metadata): Observable<FindStudentListResponse>;
 }
 
 export interface SuperSchoolUserGrpcClient {
-  FindOneByOptions(
-    request: FindOneByOptionsRequest,
-    metadata?: Metadata
-  ): Observable<FindOneByOptionsResponse>;
-  ResetPassword(
-    request: ResetPasswordRequest,
-    metadata?: Metadata
-  ): Observable<ResetPasswordResponse>;
-  ResetPasswordAttemptCount(
-    request: ResetPasswordAttemptCountRequest,
-    metadata?: Metadata
-  ): Observable<ResetPasswordAttemptCountResponse>;
+  FindOneByOptions(request: FindOneByOptionsRequest, metadata?: Metadata): Observable<FindOneByOptionsResponse>;
+  ResetPassword(request: ResetPasswordRequest, metadata?: Metadata): Observable<ResetPasswordResponse>;
+  ResetPasswordAttemptCount(request: ResetPasswordAttemptCountRequest, metadata?: Metadata): Observable<ResetPasswordAttemptCountResponse>;
 }
 
 export interface TeacherUserGrpcClient {
-  FindTeacherList(
-    request: FindTeacherListRequest,
-    metadata?: Metadata
-  ): Observable<FindTeacherListResponse>;
+  FindTeacherList(request: FindTeacherListRequest, metadata?: Metadata): Observable<FindTeacherListResponse>;
 }
 
 export interface UnifiedUserGrpcClient {
-  FindUnifiedUserList(
-    request: FindUnifiedUserListRequest,
-    metadata?: Metadata
-  ): Observable<FindUnifiedUserListResponse>;
-  FindUnifiedUserDetail(
-    request: FindUnifiedUserDetailRequest,
-    metadata?: Metadata
-  ): Observable<FindUnifiedUserDetailResponse>;
+  FindUnifiedUserList(request: FindUnifiedUserListRequest, metadata?: Metadata): Observable<FindUnifiedUserListResponse>;
+  FindUnifiedUserDetail(request: FindUnifiedUserDetailRequest, metadata?: Metadata): Observable<FindUnifiedUserDetailResponse>;
 }
