@@ -12,7 +12,7 @@ export * from "./clients";
 // proto 경로 헬퍼
 import { join } from "path";
 
-export const PROTO_DIR = join(__dirname, "..", "proto");
+export const PROTO_DIR = join(__dirname, "..", "..", "proto");
 export const ALL_PROTOS_PATH = join(PROTO_DIR, "all-protos.proto");
 export const PROTO_INCLUDE_DIRS = [PROTO_DIR, join(PROTO_DIR, "super-school")];
 export const SUPER_SCHOOL_PACKAGE = "super_school";
