@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+import "super-school/student-user.proto";
+import "super-school/teacher-user.proto";
+import "super-school/parent-user.proto";
+import "super-school/user.proto";
+import "super-school/newsletter-v2.proto";
+import "super-school/unified-user.proto";

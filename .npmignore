@@ -1,0 +1,6 @@
+src/
+generated/
+scripts/
+tsconfig.json
+tsconfig.build.json
+.github/

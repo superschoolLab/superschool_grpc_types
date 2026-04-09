@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package super_school;
+
+service NewsletterV2Service {
+  rpc findSubmissionEndTime(FindNewsletterV2SubmissionListRequest) returns (FindNewsletterV2SubmissionListResponse);
+
+  rpc findNewsletterV2List(FindNewsletterV2ListRequest) returns
+  (FindNewsletterV2ListResponse);
+}
+
+message FindNewsletterV2SubmissionListRequest {
+  int32 schoolId = 1;
+  int32 userId = 2;
+  string role = 3;
+  string startTime = 4;
+  string endTime = 5;
+}
+
+message FindNewsletterV2SubmissionListResponse {
+  repeated NewsletterV2SubmissionListItem data = 1;
+}
+
+message NewsletterV2SubmissionListItem {
+  int32 id = 1;
+  string title = 2;
+  string submissionStartTime = 3;
+  string submissionEndTime = 4;
+}
+
+
+message FindNewsletterV2ListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 year = 3;
+  string role = 4;
+  int32 userId = 5;
+  int32 studentId = 6;
+  int32 schoolId = 7;
+}
+
+message NewsletterV2ListItem {
+  int32 id = 1;
+  string title = 2;
+  string content = 3;
+  string category = 4;
+  string type = 5;
+  string source = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+  repeated string images = 9;
+  repeated string files = 10;
+}
+
+message FindNewsletterV2ListResponse {
+  repeated NewsletterV2ListItem data = 1;
+}

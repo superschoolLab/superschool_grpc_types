@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package super_school;
+
+import "user.proto";
+
+service ParentUserService {
+  rpc FindParentList(FindParentListRequest) returns (FindParentListResponse);
+}
+
+message FindParentListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string name = 3;
+  int32 schoolId = 4;
+}
+
+message FindParentListResponse {
+  repeated UserSimpleInfo data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}
+

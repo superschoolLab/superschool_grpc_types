@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package super_school;
+
+service UnifiedUserService {
+  rpc FindUnifiedUserList(FindUnifiedUserListRequest) returns (FindUnifiedUserListResponse);
+  rpc FindUnifiedUserDetail(FindUnifiedUserDetailRequest) returns (FindUnifiedUserDetailResponse);
+}
+
+// --- 리스트 조회 ---
+message FindUnifiedUserListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string name = 3;
+}
+
+message UnifiedUserListItem {
+  int32 id = 1;
+  string name = 2;
+  string loginId = 3;
+  string phoneLast4 = 4;
+  string birthDate = 5;
+}
+
+message FindUnifiedUserListResponse {
+  repeated UnifiedUserListItem data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}
+
+// --- 상세 조회 ---
+message FindUnifiedUserDetailRequest {
+  int32 unifiedUserId = 1;
+}
+
+message SchoolInfo {
+  int32 id = 1;
+  string name = 2;
+}
+
+message SchoolAccountInfo {
+  int32 id = 1;
+  string name = 2;
+  string nickName = 3;
+  string role = 4;
+  bool expired = 5;
+  string email = 6;
+  SchoolInfo school = 7;
+}
+
+message UnifiedUserDetailInfo {
+  int32 id = 1;
+  string name = 2;
+  string loginId = 3;
+  string email = 4;
+  string phone = 5;
+  string birthDate = 6;
+  bool isUnder14 = 7;
+  repeated SchoolAccountInfo schoolUsers = 8;
+}
+
+message FindUnifiedUserDetailResponse {
+  UnifiedUserDetailInfo data = 1;
+}

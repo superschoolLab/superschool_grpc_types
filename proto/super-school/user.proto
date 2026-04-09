@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package super_school;
+
+service SuperSchoolUserService {
+  rpc FindOneByOptions(FindOneByOptionsRequest) returns (FindOneByOptionsResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc ResetPasswordAttemptCount(ResetPasswordAttemptCountRequest) returns (ResetPasswordAttemptCountResponse);
+}
+
+message FindOneByOptionsRequest {
+  int32 schoolId = 1;
+  int32 userId = 2;
+}
+
+message UserUnifiedUserInfo {
+  int32 id = 1;
+  string loginId = 2;
+}
+
+message UserRelatedInfo {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  optional UserUnifiedUserInfo unifiedUser = 4;
+}
+
+message UserSimpleInfo {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  string role = 4;
+  string nickName = 5;
+  string phone = 6;
+  string profile = 7;
+  optional int32 grade = 8;
+  optional int32 klass = 9;
+  optional int32 number = 10;
+  optional UserUnifiedUserInfo unifiedUser = 11;
+  repeated UserRelatedInfo parents = 12;
+  repeated UserRelatedInfo children = 13;
+}
+
+message FindOneByOptionsResponse {
+  UserSimpleInfo data = 1;
+}
+
+message ResetPasswordRequest {
+  int32 schoolId = 1;
+  int32 userId = 2;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+}
+
+message ResetPasswordAttemptCountRequest {
+  int32 schoolId = 1;
+  int32 userId = 2;
+}
+
+message ResetPasswordAttemptCountResponse {
+  bool success = 1;
+}
+
+
