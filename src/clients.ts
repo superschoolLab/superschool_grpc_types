@@ -14,6 +14,8 @@ import type {
   FindNewsletterV2ListResponse,
   FindNewsletterV2SubmissionListRequest,
   FindNewsletterV2SubmissionListResponse,
+  FindNoticeCrawlingInfoListRequest,
+  FindNoticeCrawlingInfoListResponse,
   FindOneByOptionsRequest,
   FindOneByOptionsResponse,
   FindParentListRequest,
@@ -41,6 +43,10 @@ import type {
 export interface NewsletterV2GrpcClient {
   findSubmissionEndTime(request: FindNewsletterV2SubmissionListRequest, metadata?: Metadata): Observable<FindNewsletterV2SubmissionListResponse>;
   findNewsletterV2List(request: FindNewsletterV2ListRequest, metadata?: Metadata): Observable<FindNewsletterV2ListResponse>;
+}
+
+export interface NoticeCrawlingGrpcClient {
+  FindNoticeCrawlingInfoList(request: FindNoticeCrawlingInfoListRequest, metadata?: Metadata): Observable<FindNoticeCrawlingInfoListResponse>;
 }
 
 export interface ParentUserGrpcClient {

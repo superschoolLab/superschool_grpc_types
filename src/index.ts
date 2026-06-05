@@ -3,6 +3,7 @@
 
 // 자동 생성된 메시지 타입 re-export
 export * from '../generated/newsletter-v2';
+export * from '../generated/notice-crawling';
 export * from '../generated/parent-user';
 export * from '../generated/sms';
 export * from '../generated/student-user';

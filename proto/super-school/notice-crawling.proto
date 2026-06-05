@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package super_school;
+
+service NoticeCrawlingService {
+  rpc FindNoticeCrawlingInfoList(FindNoticeCrawlingInfoListRequest) returns (FindNoticeCrawlingInfoListResponse);
+}
+
+// --- Request ---
+message FindNoticeCrawlingInfoListRequest {
+  int32 schoolId = 1;
+}
+
+// --- Response ---
+message NoticeCrawlingInfoItem {
+  int32 id = 1;
+  string createdAt = 2;
+  string updatedAt = 3;
+  int32 schoolId = 4;
+  string noticeUrl = 5;
+  int32 type = 6;
+  int32 userId = 7;
+  bool isActive = 8;
+  int32 checkPoint = 9;
+  string boardType = 10;
+  string subType = 11;
+}
+
+message FindNoticeCrawlingInfoListResponse {
+  repeated NoticeCrawlingInfoItem data = 1;
+}
