@@ -198,33 +198,37 @@ pnpm run build         # dist/ 빌드
 git add .
 git commit -m "변경 내용"
 
-# 4. (선택) 버전 올리기
+# 4. 버전 올리기
 pnpm version patch     # 0.1.0 → 0.1.1, 자동 커밋 + 태그
 
-# 5. 푸시
+# 5. 푸시 (태그도 반드시 함께 푸시)
 git push
+git push --tags        # ⚠️ pnpm version은 태그를 로컬에만 만들기 때문에 별도 푸시 필요
 ```
+
+> `git push --tags`를 빠뜨리면 GitHub에 태그가 올라가지 않아, consumer에서 `Could not resolve vX.Y.Z to a commit ...` 에러가 발생합니다.
 
 ### consumer 업데이트
 
-현재 각 백엔드(consumer)는 태그 없이 레포를 참조하고 있어서, 재설치 시 **자동으로 최신 커밋**을 가져옵니다.
+각 백엔드(consumer)는 **태그를 명시해서 버전을 고정**하고 있습니다. 따라서 이 레포에 push만 한다고 자동 업데이트되지 않으며, consumer의 `package.json` 태그를 **직접 올려줘야** 합니다.
 
 ```json
-// package.json — 태그 없이 레포 직접 참조
-"@superschool/grpc-types": "https://github.com/superschoolLab/superschool_grpc_types.git"
+// package.json — 태그로 버전 고정
+"@superschool/grpc-types": "https://github.com/superschoolLab/superschool_grpc_types.git#v0.1.2"
 ```
 
-따라서 이 레포에 push만 하면 consumer에서 재설치할 때 최신이 반영됩니다:
+업데이트 방법 — 태그 부분을 새 버전으로 바꾼 뒤 install:
 
 ```bash
-# consumer에서 최신 버전 가져오기
-pnpm remove @superschool/grpc-types && pnpm add "https://github.com/superschoolLab/superschool_grpc_types.git"
+# 방법 1) 명령어로 (package.json 자동 수정 + lockfile 갱신)
+pnpm add "https://github.com/superschoolLab/superschool_grpc_types.git#v0.1.3"
+
+# 방법 2) package.json의 #v0.1.2 → #v0.1.3 직접 수정 후
+pnpm install
 ```
 
-> 나중에 버전을 고정하고 싶다면 태그를 사용할 수 있습니다:
-> ```json
-> "@superschool/grpc-types": "https://github.com/superschoolLab/superschool_grpc_types.git#v0.2.0"
-> ```
+> - 이 레포에서 `git push --tags`로 새 태그가 GitHub에 올라가 있어야 합니다 (위 배포 흐름 참고).
+> - git 의존성 캐시 때문에 옛 코드가 남아 있으면 `pnpm install --force`로 재해석합니다.
 
 ## 자동 생성 파일
 
