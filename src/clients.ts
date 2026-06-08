@@ -10,6 +10,8 @@ import type { Observable } from 'rxjs';
 import type {
   ChargeCreditRequest,
   ChargeCreditResponse,
+  DisconnectStudentParentRequest,
+  DisconnectStudentParentResponse,
   FindNewsletterV2ListRequest,
   FindNewsletterV2ListResponse,
   FindNewsletterV2SubmissionListRequest,
@@ -68,6 +70,7 @@ export interface SuperSchoolUserGrpcClient {
   FindOneByOptions(request: FindOneByOptionsRequest, metadata?: Metadata): Observable<FindOneByOptionsResponse>;
   ResetPassword(request: ResetPasswordRequest, metadata?: Metadata): Observable<ResetPasswordResponse>;
   ResetPasswordAttemptCount(request: ResetPasswordAttemptCountRequest, metadata?: Metadata): Observable<ResetPasswordAttemptCountResponse>;
+  DisconnectStudentParent(request: DisconnectStudentParentRequest, metadata?: Metadata): Observable<DisconnectStudentParentResponse>;
 }
 
 export interface TeacherUserGrpcClient {

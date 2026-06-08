@@ -6,6 +6,7 @@ service SuperSchoolUserService {
   rpc FindOneByOptions(FindOneByOptionsRequest) returns (FindOneByOptionsResponse);
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
   rpc ResetPasswordAttemptCount(ResetPasswordAttemptCountRequest) returns (ResetPasswordAttemptCountResponse);
+  rpc DisconnectStudentParent(DisconnectStudentParentRequest) returns (DisconnectStudentParentResponse);
 }
 
 message FindOneByOptionsRequest {
@@ -60,6 +61,15 @@ message ResetPasswordAttemptCountRequest {
 }
 
 message ResetPasswordAttemptCountResponse {
+  bool success = 1;
+}
+
+message DisconnectStudentParentRequest {
+  int32 studentId = 1;
+  int32 parentId = 2;
+}
+
+message DisconnectStudentParentResponse {
   bool success = 1;
 }
 

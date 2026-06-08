@@ -65,6 +65,15 @@ export interface ResetPasswordAttemptCountResponse {
   success: boolean;
 }
 
+export interface DisconnectStudentParentRequest {
+  studentId: number;
+  parentId: number;
+}
+
+export interface DisconnectStudentParentResponse {
+  success: boolean;
+}
+
 function createBaseFindOneByOptionsRequest(): FindOneByOptionsRequest {
   return { schoolId: 0, userId: 0 };
 }
@@ -607,6 +616,91 @@ export const ResetPasswordAttemptCountResponse: MessageFns<ResetPasswordAttemptC
   },
 };
 
+function createBaseDisconnectStudentParentRequest(): DisconnectStudentParentRequest {
+  return { studentId: 0, parentId: 0 };
+}
+
+export const DisconnectStudentParentRequest: MessageFns<DisconnectStudentParentRequest> = {
+  encode(message: DisconnectStudentParentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.studentId !== 0) {
+      writer.uint32(8).int32(message.studentId);
+    }
+    if (message.parentId !== 0) {
+      writer.uint32(16).int32(message.parentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DisconnectStudentParentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDisconnectStudentParentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.studentId = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.parentId = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseDisconnectStudentParentResponse(): DisconnectStudentParentResponse {
+  return { success: false };
+}
+
+export const DisconnectStudentParentResponse: MessageFns<DisconnectStudentParentResponse> = {
+  encode(message: DisconnectStudentParentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DisconnectStudentParentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDisconnectStudentParentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
 export interface SuperSchoolUserServiceClient {
   findOneByOptions(request: FindOneByOptionsRequest, metadata?: Metadata): Observable<FindOneByOptionsResponse>;
 
@@ -616,6 +710,11 @@ export interface SuperSchoolUserServiceClient {
     request: ResetPasswordAttemptCountRequest,
     metadata?: Metadata,
   ): Observable<ResetPasswordAttemptCountResponse>;
+
+  disconnectStudentParent(
+    request: DisconnectStudentParentRequest,
+    metadata?: Metadata,
+  ): Observable<DisconnectStudentParentResponse>;
 }
 
 export interface SuperSchoolUserServiceController {
@@ -636,11 +735,24 @@ export interface SuperSchoolUserServiceController {
     | Promise<ResetPasswordAttemptCountResponse>
     | Observable<ResetPasswordAttemptCountResponse>
     | ResetPasswordAttemptCountResponse;
+
+  disconnectStudentParent(
+    request: DisconnectStudentParentRequest,
+    metadata?: Metadata,
+  ):
+    | Promise<DisconnectStudentParentResponse>
+    | Observable<DisconnectStudentParentResponse>
+    | DisconnectStudentParentResponse;
 }
 
 export function SuperSchoolUserServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["findOneByOptions", "resetPassword", "resetPasswordAttemptCount"];
+    const grpcMethods: string[] = [
+      "findOneByOptions",
+      "resetPassword",
+      "resetPasswordAttemptCount",
+      "disconnectStudentParent",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("SuperSchoolUserService", method)(constructor.prototype[method], method, descriptor);
@@ -691,12 +803,25 @@ export const SuperSchoolUserServiceService = {
     responseDeserialize: (value: Buffer): ResetPasswordAttemptCountResponse =>
       ResetPasswordAttemptCountResponse.decode(value),
   },
+  disconnectStudentParent: {
+    path: "/super_school.SuperSchoolUserService/DisconnectStudentParent" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: DisconnectStudentParentRequest): Buffer =>
+      Buffer.from(DisconnectStudentParentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): DisconnectStudentParentRequest => DisconnectStudentParentRequest.decode(value),
+    responseSerialize: (value: DisconnectStudentParentResponse): Buffer =>
+      Buffer.from(DisconnectStudentParentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): DisconnectStudentParentResponse =>
+      DisconnectStudentParentResponse.decode(value),
+  },
 } as const;
 
 export interface SuperSchoolUserServiceServer extends UntypedServiceImplementation {
   findOneByOptions: handleUnaryCall<FindOneByOptionsRequest, FindOneByOptionsResponse>;
   resetPassword: handleUnaryCall<ResetPasswordRequest, ResetPasswordResponse>;
   resetPasswordAttemptCount: handleUnaryCall<ResetPasswordAttemptCountRequest, ResetPasswordAttemptCountResponse>;
+  disconnectStudentParent: handleUnaryCall<DisconnectStudentParentRequest, DisconnectStudentParentResponse>;
 }
 
 interface MessageFns<T> {
