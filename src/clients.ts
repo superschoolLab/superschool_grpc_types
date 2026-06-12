@@ -10,6 +10,10 @@ import type { Observable } from 'rxjs';
 import type {
   ChargeCreditRequest,
   ChargeCreditResponse,
+  CreateSmsFilterRequest,
+  CreateSmsFilterResponse,
+  DeleteSmsFilterRequest,
+  DeleteSmsFilterResponse,
   DisconnectStudentParentRequest,
   DisconnectStudentParentResponse,
   FindNewsletterV2ListRequest,
@@ -36,10 +40,18 @@ import type {
   GetCreditHistoryListResponse,
   GetCreditRemainRequest,
   GetCreditRemainResponse,
+  GetSmsFilterBlockLogListRequest,
+  GetSmsFilterBlockLogListResponse,
+  GetSmsFilterDashboardRequest,
+  GetSmsFilterDashboardResponse,
+  GetSmsFilterListRequest,
+  GetSmsFilterListResponse,
   ResetPasswordAttemptCountRequest,
   ResetPasswordAttemptCountResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  UpdateSmsFilterRequest,
+  UpdateSmsFilterResponse,
 } from './index';
 
 export interface NewsletterV2GrpcClient {
@@ -53,6 +65,15 @@ export interface NoticeCrawlingGrpcClient {
 
 export interface ParentUserGrpcClient {
   FindParentList(request: FindParentListRequest, metadata?: Metadata): Observable<FindParentListResponse>;
+}
+
+export interface SmsFilterManagementGrpcClient {
+  GetSmsFilterList(request: GetSmsFilterListRequest, metadata?: Metadata): Observable<GetSmsFilterListResponse>;
+  CreateSmsFilter(request: CreateSmsFilterRequest, metadata?: Metadata): Observable<CreateSmsFilterResponse>;
+  UpdateSmsFilter(request: UpdateSmsFilterRequest, metadata?: Metadata): Observable<UpdateSmsFilterResponse>;
+  DeleteSmsFilter(request: DeleteSmsFilterRequest, metadata?: Metadata): Observable<DeleteSmsFilterResponse>;
+  GetSmsFilterDashboard(request: GetSmsFilterDashboardRequest, metadata?: Metadata): Observable<GetSmsFilterDashboardResponse>;
+  GetSmsFilterBlockLogList(request: GetSmsFilterBlockLogListRequest, metadata?: Metadata): Observable<GetSmsFilterBlockLogListResponse>;
 }
 
 export interface SmsManagementGrpcClient {

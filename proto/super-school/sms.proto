@@ -9,6 +9,16 @@ service SmsManagementService {
   rpc GetCreditHistoryList(GetCreditHistoryListRequest) returns (GetCreditHistoryListResponse);
 }
 
+// 금칙어 / 차단 URL 필터 관리 (백오피스 전용, 전역 공통 정책)
+service SmsFilterManagementService {
+  rpc GetSmsFilterList(GetSmsFilterListRequest) returns (GetSmsFilterListResponse);
+  rpc CreateSmsFilter(CreateSmsFilterRequest) returns (CreateSmsFilterResponse);
+  rpc UpdateSmsFilter(UpdateSmsFilterRequest) returns (UpdateSmsFilterResponse);
+  rpc DeleteSmsFilter(DeleteSmsFilterRequest) returns (DeleteSmsFilterResponse);
+  rpc GetSmsFilterDashboard(GetSmsFilterDashboardRequest) returns (GetSmsFilterDashboardResponse);
+  rpc GetSmsFilterBlockLogList(GetSmsFilterBlockLogListRequest) returns (GetSmsFilterBlockLogListResponse);
+}
+
 // --- SMS 크레딧 충전 ---
 message ChargeCreditRequest {
   int32 schoolId = 1;
@@ -84,6 +94,109 @@ message SmsCreditHistoryItem {
 
 message GetCreditHistoryListResponse {
   repeated SmsCreditHistoryItem data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}
+
+// --- SMS 금칙어/차단URL 필터 목록 조회 ---
+message GetSmsFilterListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string type = 3; // WORD | URL
+  optional bool isActive = 4;
+  optional string keyword = 5; // value 부분 검색
+}
+
+message SmsFilterItem {
+  int32 id = 1;
+  optional string createdAt = 2;
+  optional string updatedAt = 3;
+  string type = 4;
+  string value = 5;
+  bool isActive = 6;
+  string reason = 7;
+}
+
+message GetSmsFilterListResponse {
+  repeated SmsFilterItem data = 1;
+  int32 totalCount = 2;
+  int32 currentPage = 3;
+  int32 limit = 4;
+  int32 totalPage = 5;
+  bool hasNext = 6;
+  bool hasPrev = 7;
+}
+
+// --- SMS 필터 생성 ---
+message CreateSmsFilterRequest {
+  string type = 1; // WORD | URL
+  string value = 2;
+  optional string reason = 3;
+  optional bool isActive = 4;
+}
+
+message CreateSmsFilterResponse {
+  bool success = 1;
+  int32 id = 2;
+}
+
+// --- SMS 필터 수정 ---
+message UpdateSmsFilterRequest {
+  int32 id = 1;
+  optional string value = 2;
+  optional bool isActive = 3;
+  optional string reason = 4;
+}
+
+message UpdateSmsFilterResponse {
+  bool success = 1;
+}
+
+// --- SMS 필터 삭제 ---
+message DeleteSmsFilterRequest {
+  int32 id = 1;
+}
+
+message DeleteSmsFilterResponse {
+  bool success = 1;
+}
+
+// --- SMS 필터 대시보드 (전역 카운트) ---
+message GetSmsFilterDashboardRequest {}
+
+message GetSmsFilterDashboardResponse {
+  int32 activeWordCount = 1; // 활성 금칙어 수
+  int32 activeUrlCount = 2; // 활성 차단 URL 수
+  int32 recentBlockLogCount = 3; // 최근 30일 차단 로그 수
+}
+
+// --- SMS 필터 차단 로그 목록 조회 ---
+message GetSmsFilterBlockLogListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional int32 schoolId = 3; // 특정 학교 필터
+  optional string startDate = 4;
+  optional string endDate = 5;
+}
+
+message SmsFilterBlockLogItem {
+  int32 id = 1;
+  optional string createdAt = 2;
+  optional int32 schoolId = 3;
+  optional string schoolName = 4;
+  optional int32 senderId = 5;
+  optional string senderName = 6;
+  string type = 7;
+  string matchedValue = 8;
+  string content = 9;
+}
+
+message GetSmsFilterBlockLogListResponse {
+  repeated SmsFilterBlockLogItem data = 1;
   int32 totalCount = 2;
   int32 currentPage = 3;
   int32 limit = 4;

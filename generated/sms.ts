@@ -93,6 +93,119 @@ export interface GetCreditHistoryListResponse {
   hasPrev: boolean;
 }
 
+/** --- SMS 금칙어/차단URL 필터 목록 조회 --- */
+export interface GetSmsFilterListRequest {
+  page: number;
+  limit: number;
+  /** WORD | URL */
+  type?: string | undefined;
+  isActive?:
+    | boolean
+    | undefined;
+  /** value 부분 검색 */
+  keyword?: string | undefined;
+}
+
+export interface SmsFilterItem {
+  id: number;
+  createdAt?: string | undefined;
+  updatedAt?: string | undefined;
+  type: string;
+  value: string;
+  isActive: boolean;
+  reason: string;
+}
+
+export interface GetSmsFilterListResponse {
+  data: SmsFilterItem[];
+  totalCount: number;
+  currentPage: number;
+  limit: number;
+  totalPage: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+/** --- SMS 필터 생성 --- */
+export interface CreateSmsFilterRequest {
+  /** WORD | URL */
+  type: string;
+  value: string;
+  reason?: string | undefined;
+  isActive?: boolean | undefined;
+}
+
+export interface CreateSmsFilterResponse {
+  success: boolean;
+  id: number;
+}
+
+/** --- SMS 필터 수정 --- */
+export interface UpdateSmsFilterRequest {
+  id: number;
+  value?: string | undefined;
+  isActive?: boolean | undefined;
+  reason?: string | undefined;
+}
+
+export interface UpdateSmsFilterResponse {
+  success: boolean;
+}
+
+/** --- SMS 필터 삭제 --- */
+export interface DeleteSmsFilterRequest {
+  id: number;
+}
+
+export interface DeleteSmsFilterResponse {
+  success: boolean;
+}
+
+/** --- SMS 필터 대시보드 (전역 카운트) --- */
+export interface GetSmsFilterDashboardRequest {
+}
+
+export interface GetSmsFilterDashboardResponse {
+  /** 활성 금칙어 수 */
+  activeWordCount: number;
+  /** 활성 차단 URL 수 */
+  activeUrlCount: number;
+  /** 최근 30일 차단 로그 수 */
+  recentBlockLogCount: number;
+}
+
+/** --- SMS 필터 차단 로그 목록 조회 --- */
+export interface GetSmsFilterBlockLogListRequest {
+  page: number;
+  limit: number;
+  /** 특정 학교 필터 */
+  schoolId?: number | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+}
+
+export interface SmsFilterBlockLogItem {
+  id: number;
+  createdAt?: string | undefined;
+  schoolId?: number | undefined;
+  schoolName?: string | undefined;
+  senderId?: number | undefined;
+  senderName?: string | undefined;
+  type: string;
+  matchedValue: string;
+  content: string;
+}
+
+export interface GetSmsFilterBlockLogListResponse {
+  data: SmsFilterBlockLogItem[];
+  totalCount: number;
+  currentPage: number;
+  limit: number;
+  totalPage: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
 function createBaseChargeCreditRequest(): ChargeCreditRequest {
   return { schoolId: 0, chargeCredit: 0 };
 }
@@ -900,6 +1013,986 @@ export const GetCreditHistoryListResponse: MessageFns<GetCreditHistoryListRespon
   },
 };
 
+function createBaseGetSmsFilterListRequest(): GetSmsFilterListRequest {
+  return { page: 0, limit: 0 };
+}
+
+export const GetSmsFilterListRequest: MessageFns<GetSmsFilterListRequest> = {
+  encode(message: GetSmsFilterListRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.page !== 0) {
+      writer.uint32(8).int32(message.page);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(16).int32(message.limit);
+    }
+    if (message.type !== undefined) {
+      writer.uint32(26).string(message.type);
+    }
+    if (message.isActive !== undefined) {
+      writer.uint32(32).bool(message.isActive);
+    }
+    if (message.keyword !== undefined) {
+      writer.uint32(42).string(message.keyword);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterListRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.page = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.type = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.isActive = reader.bool();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.keyword = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseSmsFilterItem(): SmsFilterItem {
+  return { id: 0, type: "", value: "", isActive: false, reason: "" };
+}
+
+export const SmsFilterItem: MessageFns<SmsFilterItem> = {
+  encode(message: SmsFilterItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.createdAt !== undefined) {
+      writer.uint32(18).string(message.createdAt);
+    }
+    if (message.updatedAt !== undefined) {
+      writer.uint32(26).string(message.updatedAt);
+    }
+    if (message.type !== "") {
+      writer.uint32(34).string(message.type);
+    }
+    if (message.value !== "") {
+      writer.uint32(42).string(message.value);
+    }
+    if (message.isActive !== false) {
+      writer.uint32(48).bool(message.isActive);
+    }
+    if (message.reason !== "") {
+      writer.uint32(58).string(message.reason);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SmsFilterItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSmsFilterItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.type = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.isActive = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.reason = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetSmsFilterListResponse(): GetSmsFilterListResponse {
+  return { data: [], totalCount: 0, currentPage: 0, limit: 0, totalPage: 0, hasNext: false, hasPrev: false };
+}
+
+export const GetSmsFilterListResponse: MessageFns<GetSmsFilterListResponse> = {
+  encode(message: GetSmsFilterListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.data) {
+      SmsFilterItem.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.totalCount !== 0) {
+      writer.uint32(16).int32(message.totalCount);
+    }
+    if (message.currentPage !== 0) {
+      writer.uint32(24).int32(message.currentPage);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(32).int32(message.limit);
+    }
+    if (message.totalPage !== 0) {
+      writer.uint32(40).int32(message.totalPage);
+    }
+    if (message.hasNext !== false) {
+      writer.uint32(48).bool(message.hasNext);
+    }
+    if (message.hasPrev !== false) {
+      writer.uint32(56).bool(message.hasPrev);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterListResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.data.push(SmsFilterItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalCount = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.currentPage = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.totalPage = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.hasNext = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.hasPrev = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCreateSmsFilterRequest(): CreateSmsFilterRequest {
+  return { type: "", value: "" };
+}
+
+export const CreateSmsFilterRequest: MessageFns<CreateSmsFilterRequest> = {
+  encode(message: CreateSmsFilterRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.type !== "") {
+      writer.uint32(10).string(message.type);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    if (message.reason !== undefined) {
+      writer.uint32(26).string(message.reason);
+    }
+    if (message.isActive !== undefined) {
+      writer.uint32(32).bool(message.isActive);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CreateSmsFilterRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateSmsFilterRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.type = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.reason = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.isActive = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCreateSmsFilterResponse(): CreateSmsFilterResponse {
+  return { success: false, id: 0 };
+}
+
+export const CreateSmsFilterResponse: MessageFns<CreateSmsFilterResponse> = {
+  encode(message: CreateSmsFilterResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.id !== 0) {
+      writer.uint32(16).int32(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CreateSmsFilterResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateSmsFilterResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseUpdateSmsFilterRequest(): UpdateSmsFilterRequest {
+  return { id: 0 };
+}
+
+export const UpdateSmsFilterRequest: MessageFns<UpdateSmsFilterRequest> = {
+  encode(message: UpdateSmsFilterRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.value !== undefined) {
+      writer.uint32(18).string(message.value);
+    }
+    if (message.isActive !== undefined) {
+      writer.uint32(24).bool(message.isActive);
+    }
+    if (message.reason !== undefined) {
+      writer.uint32(34).string(message.reason);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateSmsFilterRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateSmsFilterRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.isActive = reader.bool();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.reason = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseUpdateSmsFilterResponse(): UpdateSmsFilterResponse {
+  return { success: false };
+}
+
+export const UpdateSmsFilterResponse: MessageFns<UpdateSmsFilterResponse> = {
+  encode(message: UpdateSmsFilterResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateSmsFilterResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateSmsFilterResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseDeleteSmsFilterRequest(): DeleteSmsFilterRequest {
+  return { id: 0 };
+}
+
+export const DeleteSmsFilterRequest: MessageFns<DeleteSmsFilterRequest> = {
+  encode(message: DeleteSmsFilterRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteSmsFilterRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteSmsFilterRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseDeleteSmsFilterResponse(): DeleteSmsFilterResponse {
+  return { success: false };
+}
+
+export const DeleteSmsFilterResponse: MessageFns<DeleteSmsFilterResponse> = {
+  encode(message: DeleteSmsFilterResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteSmsFilterResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteSmsFilterResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetSmsFilterDashboardRequest(): GetSmsFilterDashboardRequest {
+  return {};
+}
+
+export const GetSmsFilterDashboardRequest: MessageFns<GetSmsFilterDashboardRequest> = {
+  encode(_: GetSmsFilterDashboardRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterDashboardRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterDashboardRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetSmsFilterDashboardResponse(): GetSmsFilterDashboardResponse {
+  return { activeWordCount: 0, activeUrlCount: 0, recentBlockLogCount: 0 };
+}
+
+export const GetSmsFilterDashboardResponse: MessageFns<GetSmsFilterDashboardResponse> = {
+  encode(message: GetSmsFilterDashboardResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.activeWordCount !== 0) {
+      writer.uint32(8).int32(message.activeWordCount);
+    }
+    if (message.activeUrlCount !== 0) {
+      writer.uint32(16).int32(message.activeUrlCount);
+    }
+    if (message.recentBlockLogCount !== 0) {
+      writer.uint32(24).int32(message.recentBlockLogCount);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterDashboardResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterDashboardResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.activeWordCount = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.activeUrlCount = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.recentBlockLogCount = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetSmsFilterBlockLogListRequest(): GetSmsFilterBlockLogListRequest {
+  return { page: 0, limit: 0 };
+}
+
+export const GetSmsFilterBlockLogListRequest: MessageFns<GetSmsFilterBlockLogListRequest> = {
+  encode(message: GetSmsFilterBlockLogListRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.page !== 0) {
+      writer.uint32(8).int32(message.page);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(16).int32(message.limit);
+    }
+    if (message.schoolId !== undefined) {
+      writer.uint32(24).int32(message.schoolId);
+    }
+    if (message.startDate !== undefined) {
+      writer.uint32(34).string(message.startDate);
+    }
+    if (message.endDate !== undefined) {
+      writer.uint32(42).string(message.endDate);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterBlockLogListRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterBlockLogListRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.page = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.startDate = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.endDate = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseSmsFilterBlockLogItem(): SmsFilterBlockLogItem {
+  return { id: 0, type: "", matchedValue: "", content: "" };
+}
+
+export const SmsFilterBlockLogItem: MessageFns<SmsFilterBlockLogItem> = {
+  encode(message: SmsFilterBlockLogItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
+    if (message.createdAt !== undefined) {
+      writer.uint32(18).string(message.createdAt);
+    }
+    if (message.schoolId !== undefined) {
+      writer.uint32(24).int32(message.schoolId);
+    }
+    if (message.schoolName !== undefined) {
+      writer.uint32(34).string(message.schoolName);
+    }
+    if (message.senderId !== undefined) {
+      writer.uint32(40).int32(message.senderId);
+    }
+    if (message.senderName !== undefined) {
+      writer.uint32(50).string(message.senderName);
+    }
+    if (message.type !== "") {
+      writer.uint32(58).string(message.type);
+    }
+    if (message.matchedValue !== "") {
+      writer.uint32(66).string(message.matchedValue);
+    }
+    if (message.content !== "") {
+      writer.uint32(74).string(message.content);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SmsFilterBlockLogItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSmsFilterBlockLogItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.schoolName = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.senderId = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.senderName = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.type = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.matchedValue = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.content = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseGetSmsFilterBlockLogListResponse(): GetSmsFilterBlockLogListResponse {
+  return { data: [], totalCount: 0, currentPage: 0, limit: 0, totalPage: 0, hasNext: false, hasPrev: false };
+}
+
+export const GetSmsFilterBlockLogListResponse: MessageFns<GetSmsFilterBlockLogListResponse> = {
+  encode(message: GetSmsFilterBlockLogListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.data) {
+      SmsFilterBlockLogItem.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.totalCount !== 0) {
+      writer.uint32(16).int32(message.totalCount);
+    }
+    if (message.currentPage !== 0) {
+      writer.uint32(24).int32(message.currentPage);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(32).int32(message.limit);
+    }
+    if (message.totalPage !== 0) {
+      writer.uint32(40).int32(message.totalPage);
+    }
+    if (message.hasNext !== false) {
+      writer.uint32(48).bool(message.hasNext);
+    }
+    if (message.hasPrev !== false) {
+      writer.uint32(56).bool(message.hasPrev);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetSmsFilterBlockLogListResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetSmsFilterBlockLogListResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.data.push(SmsFilterBlockLogItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalCount = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.currentPage = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.totalPage = reader.int32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.hasNext = reader.bool();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.hasPrev = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
 export interface SmsManagementServiceClient {
   chargeCredit(request: ChargeCreditRequest, metadata?: Metadata): Observable<ChargeCreditResponse>;
 
@@ -1007,6 +2100,171 @@ export interface SmsManagementServiceServer extends UntypedServiceImplementation
   getCreditRemain: handleUnaryCall<GetCreditRemainRequest, GetCreditRemainResponse>;
   getCreditChargeList: handleUnaryCall<GetCreditChargeListRequest, GetCreditChargeListResponse>;
   getCreditHistoryList: handleUnaryCall<GetCreditHistoryListRequest, GetCreditHistoryListResponse>;
+}
+
+/** 금칙어 / 차단 URL 필터 관리 (백오피스 전용, 전역 공통 정책) */
+
+export interface SmsFilterManagementServiceClient {
+  getSmsFilterList(request: GetSmsFilterListRequest, metadata?: Metadata): Observable<GetSmsFilterListResponse>;
+
+  createSmsFilter(request: CreateSmsFilterRequest, metadata?: Metadata): Observable<CreateSmsFilterResponse>;
+
+  updateSmsFilter(request: UpdateSmsFilterRequest, metadata?: Metadata): Observable<UpdateSmsFilterResponse>;
+
+  deleteSmsFilter(request: DeleteSmsFilterRequest, metadata?: Metadata): Observable<DeleteSmsFilterResponse>;
+
+  getSmsFilterDashboard(
+    request: GetSmsFilterDashboardRequest,
+    metadata?: Metadata,
+  ): Observable<GetSmsFilterDashboardResponse>;
+
+  getSmsFilterBlockLogList(
+    request: GetSmsFilterBlockLogListRequest,
+    metadata?: Metadata,
+  ): Observable<GetSmsFilterBlockLogListResponse>;
+}
+
+/** 금칙어 / 차단 URL 필터 관리 (백오피스 전용, 전역 공통 정책) */
+
+export interface SmsFilterManagementServiceController {
+  getSmsFilterList(
+    request: GetSmsFilterListRequest,
+    metadata?: Metadata,
+  ): Promise<GetSmsFilterListResponse> | Observable<GetSmsFilterListResponse> | GetSmsFilterListResponse;
+
+  createSmsFilter(
+    request: CreateSmsFilterRequest,
+    metadata?: Metadata,
+  ): Promise<CreateSmsFilterResponse> | Observable<CreateSmsFilterResponse> | CreateSmsFilterResponse;
+
+  updateSmsFilter(
+    request: UpdateSmsFilterRequest,
+    metadata?: Metadata,
+  ): Promise<UpdateSmsFilterResponse> | Observable<UpdateSmsFilterResponse> | UpdateSmsFilterResponse;
+
+  deleteSmsFilter(
+    request: DeleteSmsFilterRequest,
+    metadata?: Metadata,
+  ): Promise<DeleteSmsFilterResponse> | Observable<DeleteSmsFilterResponse> | DeleteSmsFilterResponse;
+
+  getSmsFilterDashboard(
+    request: GetSmsFilterDashboardRequest,
+    metadata?: Metadata,
+  ): Promise<GetSmsFilterDashboardResponse> | Observable<GetSmsFilterDashboardResponse> | GetSmsFilterDashboardResponse;
+
+  getSmsFilterBlockLogList(
+    request: GetSmsFilterBlockLogListRequest,
+    metadata?: Metadata,
+  ):
+    | Promise<GetSmsFilterBlockLogListResponse>
+    | Observable<GetSmsFilterBlockLogListResponse>
+    | GetSmsFilterBlockLogListResponse;
+}
+
+export function SmsFilterManagementServiceControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      "getSmsFilterList",
+      "createSmsFilter",
+      "updateSmsFilter",
+      "deleteSmsFilter",
+      "getSmsFilterDashboard",
+      "getSmsFilterBlockLogList",
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("SmsFilterManagementService", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("SmsFilterManagementService", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const SMS_FILTER_MANAGEMENT_SERVICE_NAME = "SmsFilterManagementService";
+
+/** 금칙어 / 차단 URL 필터 관리 (백오피스 전용, 전역 공통 정책) */
+export type SmsFilterManagementServiceService = typeof SmsFilterManagementServiceService;
+export const SmsFilterManagementServiceService = {
+  getSmsFilterList: {
+    path: "/super_school.SmsFilterManagementService/GetSmsFilterList" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: GetSmsFilterListRequest): Buffer =>
+      Buffer.from(GetSmsFilterListRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): GetSmsFilterListRequest => GetSmsFilterListRequest.decode(value),
+    responseSerialize: (value: GetSmsFilterListResponse): Buffer =>
+      Buffer.from(GetSmsFilterListResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): GetSmsFilterListResponse => GetSmsFilterListResponse.decode(value),
+  },
+  createSmsFilter: {
+    path: "/super_school.SmsFilterManagementService/CreateSmsFilter" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: CreateSmsFilterRequest): Buffer =>
+      Buffer.from(CreateSmsFilterRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): CreateSmsFilterRequest => CreateSmsFilterRequest.decode(value),
+    responseSerialize: (value: CreateSmsFilterResponse): Buffer =>
+      Buffer.from(CreateSmsFilterResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): CreateSmsFilterResponse => CreateSmsFilterResponse.decode(value),
+  },
+  updateSmsFilter: {
+    path: "/super_school.SmsFilterManagementService/UpdateSmsFilter" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: UpdateSmsFilterRequest): Buffer =>
+      Buffer.from(UpdateSmsFilterRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): UpdateSmsFilterRequest => UpdateSmsFilterRequest.decode(value),
+    responseSerialize: (value: UpdateSmsFilterResponse): Buffer =>
+      Buffer.from(UpdateSmsFilterResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): UpdateSmsFilterResponse => UpdateSmsFilterResponse.decode(value),
+  },
+  deleteSmsFilter: {
+    path: "/super_school.SmsFilterManagementService/DeleteSmsFilter" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: DeleteSmsFilterRequest): Buffer =>
+      Buffer.from(DeleteSmsFilterRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): DeleteSmsFilterRequest => DeleteSmsFilterRequest.decode(value),
+    responseSerialize: (value: DeleteSmsFilterResponse): Buffer =>
+      Buffer.from(DeleteSmsFilterResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): DeleteSmsFilterResponse => DeleteSmsFilterResponse.decode(value),
+  },
+  getSmsFilterDashboard: {
+    path: "/super_school.SmsFilterManagementService/GetSmsFilterDashboard" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: GetSmsFilterDashboardRequest): Buffer =>
+      Buffer.from(GetSmsFilterDashboardRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): GetSmsFilterDashboardRequest => GetSmsFilterDashboardRequest.decode(value),
+    responseSerialize: (value: GetSmsFilterDashboardResponse): Buffer =>
+      Buffer.from(GetSmsFilterDashboardResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): GetSmsFilterDashboardResponse => GetSmsFilterDashboardResponse.decode(value),
+  },
+  getSmsFilterBlockLogList: {
+    path: "/super_school.SmsFilterManagementService/GetSmsFilterBlockLogList" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: GetSmsFilterBlockLogListRequest): Buffer =>
+      Buffer.from(GetSmsFilterBlockLogListRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): GetSmsFilterBlockLogListRequest =>
+      GetSmsFilterBlockLogListRequest.decode(value),
+    responseSerialize: (value: GetSmsFilterBlockLogListResponse): Buffer =>
+      Buffer.from(GetSmsFilterBlockLogListResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): GetSmsFilterBlockLogListResponse =>
+      GetSmsFilterBlockLogListResponse.decode(value),
+  },
+} as const;
+
+export interface SmsFilterManagementServiceServer extends UntypedServiceImplementation {
+  getSmsFilterList: handleUnaryCall<GetSmsFilterListRequest, GetSmsFilterListResponse>;
+  createSmsFilter: handleUnaryCall<CreateSmsFilterRequest, CreateSmsFilterResponse>;
+  updateSmsFilter: handleUnaryCall<UpdateSmsFilterRequest, UpdateSmsFilterResponse>;
+  deleteSmsFilter: handleUnaryCall<DeleteSmsFilterRequest, DeleteSmsFilterResponse>;
+  getSmsFilterDashboard: handleUnaryCall<GetSmsFilterDashboardRequest, GetSmsFilterDashboardResponse>;
+  getSmsFilterBlockLogList: handleUnaryCall<GetSmsFilterBlockLogListRequest, GetSmsFilterBlockLogListResponse>;
 }
 
 interface MessageFns<T> {
