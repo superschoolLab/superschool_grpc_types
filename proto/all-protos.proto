@@ -5,6 +5,7 @@ syntax = "proto3";
 
 import "super-school/newsletter-v2.proto";
 import "super-school/notice-crawling.proto";
+import "super-school/notification.proto";
 import "super-school/parent-user.proto";
 import "super-school/sms.proto";
 import "super-school/student-user.proto";

@@ -12,6 +12,8 @@ import type {
   ChargeCreditResponse,
   CreateSmsFilterRequest,
   CreateSmsFilterResponse,
+  CreateUserNotificationsRequest,
+  CreateUserNotificationsResponse,
   DeleteSmsFilterRequest,
   DeleteSmsFilterResponse,
   DisconnectStudentParentRequest,
@@ -61,6 +63,10 @@ export interface NewsletterV2GrpcClient {
 
 export interface NoticeCrawlingGrpcClient {
   FindNoticeCrawlingInfoList(request: FindNoticeCrawlingInfoListRequest, metadata?: Metadata): Observable<FindNoticeCrawlingInfoListResponse>;
+}
+
+export interface NotificationInboxGrpcClient {
+  CreateUserNotifications(request: CreateUserNotificationsRequest, metadata?: Metadata): Observable<CreateUserNotificationsResponse>;
 }
 
 export interface ParentUserGrpcClient {

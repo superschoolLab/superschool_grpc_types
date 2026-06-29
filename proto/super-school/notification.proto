@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package super_school;
+
+// 알림센터 인박스(user_notification) — 레거시 → V2 dual-write fan-out
+service NotificationInboxService {
+  // 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄.
+  rpc CreateUserNotifications(CreateUserNotificationsRequest) returns (CreateUserNotificationsResponse);
+}
+
+// --- 알림 인박스 fan-out 생성 ---
+message CreateUserNotificationsRequest {
+  repeated string targetEmails = 1; // 수신자 이메일들 (V2가 user 매칭, 매칭 없는 건 skip)
+  int32 schoolId = 2;
+  string title = 3;
+  string body = 4;
+  string url = 5; // 리다이렉트 URL, 없으면 ""
+  string type = 6; // NotificationLogType 값 (BASIC/ABSENT/FIELDTRIP/...)
+  optional int32 documentId = 7; // 소스 문서 id (orphan 정리·그룹키), 없으면 unset
+}
+
+// 응답 없음 (fire-and-forget) — 빈 메시지로 void 처리
+message CreateUserNotificationsResponse {}
