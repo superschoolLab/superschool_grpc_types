@@ -56,6 +56,16 @@ export interface FindNewsletterV2ListResponse {
   data: NewsletterV2ListItem[];
 }
 
+export interface CountUnreadNewsletterV2Request {
+  schoolId: number;
+  studentId: number;
+  role: string;
+}
+
+export interface CountUnreadNewsletterV2Response {
+  count: number;
+}
+
 function createBaseFindNewsletterV2SubmissionListRequest(): FindNewsletterV2SubmissionListRequest {
   return { schoolId: 0, userId: 0, role: "", startTime: "", endTime: "" };
 }
@@ -531,6 +541,102 @@ export const FindNewsletterV2ListResponse: MessageFns<FindNewsletterV2ListRespon
   },
 };
 
+function createBaseCountUnreadNewsletterV2Request(): CountUnreadNewsletterV2Request {
+  return { schoolId: 0, studentId: 0, role: "" };
+}
+
+export const CountUnreadNewsletterV2Request: MessageFns<CountUnreadNewsletterV2Request> = {
+  encode(message: CountUnreadNewsletterV2Request, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.schoolId !== 0) {
+      writer.uint32(8).int32(message.schoolId);
+    }
+    if (message.studentId !== 0) {
+      writer.uint32(16).int32(message.studentId);
+    }
+    if (message.role !== "") {
+      writer.uint32(26).string(message.role);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CountUnreadNewsletterV2Request {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCountUnreadNewsletterV2Request();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.studentId = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.role = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseCountUnreadNewsletterV2Response(): CountUnreadNewsletterV2Response {
+  return { count: 0 };
+}
+
+export const CountUnreadNewsletterV2Response: MessageFns<CountUnreadNewsletterV2Response> = {
+  encode(message: CountUnreadNewsletterV2Response, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.count !== 0) {
+      writer.uint32(8).int32(message.count);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CountUnreadNewsletterV2Response {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCountUnreadNewsletterV2Response();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.count = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
 export interface NewsletterV2ServiceClient {
   findSubmissionEndTime(
     request: FindNewsletterV2SubmissionListRequest,
@@ -541,6 +647,11 @@ export interface NewsletterV2ServiceClient {
     request: FindNewsletterV2ListRequest,
     metadata?: Metadata,
   ): Observable<FindNewsletterV2ListResponse>;
+
+  countUnreadNewsletterV2(
+    request: CountUnreadNewsletterV2Request,
+    metadata?: Metadata,
+  ): Observable<CountUnreadNewsletterV2Response>;
 }
 
 export interface NewsletterV2ServiceController {
@@ -556,11 +667,19 @@ export interface NewsletterV2ServiceController {
     request: FindNewsletterV2ListRequest,
     metadata?: Metadata,
   ): Promise<FindNewsletterV2ListResponse> | Observable<FindNewsletterV2ListResponse> | FindNewsletterV2ListResponse;
+
+  countUnreadNewsletterV2(
+    request: CountUnreadNewsletterV2Request,
+    metadata?: Metadata,
+  ):
+    | Promise<CountUnreadNewsletterV2Response>
+    | Observable<CountUnreadNewsletterV2Response>
+    | CountUnreadNewsletterV2Response;
 }
 
 export function NewsletterV2ServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["findSubmissionEndTime", "findNewsletterV2List"];
+    const grpcMethods: string[] = ["findSubmissionEndTime", "findNewsletterV2List", "countUnreadNewsletterV2"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("NewsletterV2Service", method)(constructor.prototype[method], method, descriptor);
@@ -601,11 +720,24 @@ export const NewsletterV2ServiceService = {
       Buffer.from(FindNewsletterV2ListResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer): FindNewsletterV2ListResponse => FindNewsletterV2ListResponse.decode(value),
   },
+  countUnreadNewsletterV2: {
+    path: "/super_school.NewsletterV2Service/countUnreadNewsletterV2" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: CountUnreadNewsletterV2Request): Buffer =>
+      Buffer.from(CountUnreadNewsletterV2Request.encode(value).finish()),
+    requestDeserialize: (value: Buffer): CountUnreadNewsletterV2Request => CountUnreadNewsletterV2Request.decode(value),
+    responseSerialize: (value: CountUnreadNewsletterV2Response): Buffer =>
+      Buffer.from(CountUnreadNewsletterV2Response.encode(value).finish()),
+    responseDeserialize: (value: Buffer): CountUnreadNewsletterV2Response =>
+      CountUnreadNewsletterV2Response.decode(value),
+  },
 } as const;
 
 export interface NewsletterV2ServiceServer extends UntypedServiceImplementation {
   findSubmissionEndTime: handleUnaryCall<FindNewsletterV2SubmissionListRequest, FindNewsletterV2SubmissionListResponse>;
   findNewsletterV2List: handleUnaryCall<FindNewsletterV2ListRequest, FindNewsletterV2ListResponse>;
+  countUnreadNewsletterV2: handleUnaryCall<CountUnreadNewsletterV2Request, CountUnreadNewsletterV2Response>;
 }
 
 interface MessageFns<T> {

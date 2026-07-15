@@ -10,6 +10,8 @@ import type { Observable } from 'rxjs';
 import type {
   ChargeCreditRequest,
   ChargeCreditResponse,
+  CountUnreadNewsletterV2Request,
+  CountUnreadNewsletterV2Response,
   CreateSmsFilterRequest,
   CreateSmsFilterResponse,
   CreateUserNotificationsRequest,
@@ -59,6 +61,7 @@ import type {
 export interface NewsletterV2GrpcClient {
   findSubmissionEndTime(request: FindNewsletterV2SubmissionListRequest, metadata?: Metadata): Observable<FindNewsletterV2SubmissionListResponse>;
   findNewsletterV2List(request: FindNewsletterV2ListRequest, metadata?: Metadata): Observable<FindNewsletterV2ListResponse>;
+  countUnreadNewsletterV2(request: CountUnreadNewsletterV2Request, metadata?: Metadata): Observable<CountUnreadNewsletterV2Response>;
 }
 
 export interface NoticeCrawlingGrpcClient {

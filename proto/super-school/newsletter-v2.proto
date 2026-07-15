@@ -7,6 +7,9 @@ service NewsletterV2Service {
 
   rpc findNewsletterV2List(FindNewsletterV2ListRequest) returns
   (FindNewsletterV2ListResponse);
+
+  rpc countUnreadNewsletterV2(CountUnreadNewsletterV2Request) returns
+  (CountUnreadNewsletterV2Response);
 }
 
 message FindNewsletterV2SubmissionListRequest {
@@ -54,4 +57,14 @@ message NewsletterV2ListItem {
 
 message FindNewsletterV2ListResponse {
   repeated NewsletterV2ListItem data = 1;
+}
+
+message CountUnreadNewsletterV2Request {
+  int32 schoolId = 1;
+  int32 studentId = 2;
+  string role = 3;
+}
+
+message CountUnreadNewsletterV2Response {
+  int32 count = 1;
 }
