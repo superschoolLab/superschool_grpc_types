@@ -14,7 +14,10 @@ import { Observable } from "rxjs";
 export interface FindUnifiedUserListRequest {
   page: number;
   limit: number;
+  /** 검색 조건은 하나만 전달한다. (각각 일치 검색) */
   name?: string | undefined;
+  loginId?: string | undefined;
+  phoneLast4?: string | undefined;
 }
 
 export interface UnifiedUserListItem {
@@ -85,6 +88,12 @@ export const FindUnifiedUserListRequest: MessageFns<FindUnifiedUserListRequest> 
     if (message.name !== undefined) {
       writer.uint32(26).string(message.name);
     }
+    if (message.loginId !== undefined) {
+      writer.uint32(34).string(message.loginId);
+    }
+    if (message.phoneLast4 !== undefined) {
+      writer.uint32(42).string(message.phoneLast4);
+    }
     return writer;
   },
 
@@ -117,6 +126,22 @@ export const FindUnifiedUserListRequest: MessageFns<FindUnifiedUserListRequest> 
           }
 
           message.name = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.loginId = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.phoneLast4 = reader.string();
           continue;
         }
       }

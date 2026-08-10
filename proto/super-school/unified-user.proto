@@ -11,7 +11,10 @@ service UnifiedUserService {
 message FindUnifiedUserListRequest {
   int32 page = 1;
   int32 limit = 2;
+  // 검색 조건은 하나만 전달한다. (각각 일치 검색)
   optional string name = 3;
+  optional string loginId = 4;
+  optional string phoneLast4 = 5;
 }
 
 message UnifiedUserListItem {
