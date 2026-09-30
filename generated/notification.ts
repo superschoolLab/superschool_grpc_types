@@ -29,6 +29,30 @@ export interface CreateUserNotificationsRequest {
 export interface CreateUserNotificationsResponse {
 }
 
+/** --- 알림 발송 --- */
+export interface SendNotificationRequest {
+  /** 수신자 이메일 전체 (끊지 말고 한 번에 — 형제계정 미러가 발송 1회 기준으로 계산됨) */
+  targetEmails: string[];
+  /** 푸시 제목 앞 학교명 조회용 */
+  schoolId: number;
+  title: string;
+  body: string;
+  /** 리다이렉트 URL, 없으면 "" */
+  url: string;
+  /** NotificationLogType 값 — CHAT 이면 인박스·미러 없이 푸시만 */
+  type: string;
+  /** 소스 문서 id, 없으면 unset */
+  documentId?:
+    | number
+    | undefined;
+  /** 알림설정 종류 스위치 (approvals/attendances/chats/posts), 없으면 "" → 허용 시간만 적용 */
+  notificationType: string;
+}
+
+/** 응답 없음 (fire-and-forget) */
+export interface SendNotificationResponse {
+}
+
 function createBaseCreateUserNotificationsRequest(): CreateUserNotificationsRequest {
   return { targetEmails: [], schoolId: 0, title: "", body: "", url: "", type: "" };
 }
@@ -158,7 +182,147 @@ export const CreateUserNotificationsResponse: MessageFns<CreateUserNotifications
   },
 };
 
-/** 알림센터 인박스(user_notification) — 레거시 → V2 dual-write fan-out */
+function createBaseSendNotificationRequest(): SendNotificationRequest {
+  return { targetEmails: [], schoolId: 0, title: "", body: "", url: "", type: "", notificationType: "" };
+}
+
+export const SendNotificationRequest: MessageFns<SendNotificationRequest> = {
+  encode(message: SendNotificationRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.targetEmails) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.schoolId !== 0) {
+      writer.uint32(16).int32(message.schoolId);
+    }
+    if (message.title !== "") {
+      writer.uint32(26).string(message.title);
+    }
+    if (message.body !== "") {
+      writer.uint32(34).string(message.body);
+    }
+    if (message.url !== "") {
+      writer.uint32(42).string(message.url);
+    }
+    if (message.type !== "") {
+      writer.uint32(50).string(message.type);
+    }
+    if (message.documentId !== undefined) {
+      writer.uint32(56).int32(message.documentId);
+    }
+    if (message.notificationType !== "") {
+      writer.uint32(66).string(message.notificationType);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendNotificationRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendNotificationRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.targetEmails.push(reader.string());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.schoolId = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.title = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.body = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.url = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.type = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.documentId = reader.int32();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.notificationType = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseSendNotificationResponse(): SendNotificationResponse {
+  return {};
+}
+
+export const SendNotificationResponse: MessageFns<SendNotificationResponse> = {
+  encode(_: SendNotificationResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendNotificationResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendNotificationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+};
+
+/** 레거시 → V2 알림 (알림센터 인박스 fan-out + 발송) */
 
 export interface NotificationInboxServiceClient {
   /** 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄. */
@@ -167,9 +331,13 @@ export interface NotificationInboxServiceClient {
     request: CreateUserNotificationsRequest,
     metadata?: Metadata,
   ): Observable<CreateUserNotificationsResponse>;
+
+  /** 알림 발송 (fire-and-forget) — 인박스 생성 + 형제계정 미러 + 알림설정 판정 + 푸시를 V2가 전부 처리 */
+
+  sendNotification(request: SendNotificationRequest, metadata?: Metadata): Observable<SendNotificationResponse>;
 }
 
-/** 알림센터 인박스(user_notification) — 레거시 → V2 dual-write fan-out */
+/** 레거시 → V2 알림 (알림센터 인박스 fan-out + 발송) */
 
 export interface NotificationInboxServiceController {
   /** 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄. */
@@ -181,11 +349,18 @@ export interface NotificationInboxServiceController {
     | Promise<CreateUserNotificationsResponse>
     | Observable<CreateUserNotificationsResponse>
     | CreateUserNotificationsResponse;
+
+  /** 알림 발송 (fire-and-forget) — 인박스 생성 + 형제계정 미러 + 알림설정 판정 + 푸시를 V2가 전부 처리 */
+
+  sendNotification(
+    request: SendNotificationRequest,
+    metadata?: Metadata,
+  ): Promise<SendNotificationResponse> | Observable<SendNotificationResponse> | SendNotificationResponse;
 }
 
 export function NotificationInboxServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createUserNotifications"];
+    const grpcMethods: string[] = ["createUserNotifications", "sendNotification"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("NotificationInboxService", method)(constructor.prototype[method], method, descriptor);
@@ -200,7 +375,7 @@ export function NotificationInboxServiceControllerMethods() {
 
 export const NOTIFICATION_INBOX_SERVICE_NAME = "NotificationInboxService";
 
-/** 알림센터 인박스(user_notification) — 레거시 → V2 dual-write fan-out */
+/** 레거시 → V2 알림 (알림센터 인박스 fan-out + 발송) */
 export type NotificationInboxServiceService = typeof NotificationInboxServiceService;
 export const NotificationInboxServiceService = {
   /** 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄. */
@@ -216,11 +391,25 @@ export const NotificationInboxServiceService = {
     responseDeserialize: (value: Buffer): CreateUserNotificationsResponse =>
       CreateUserNotificationsResponse.decode(value),
   },
+  /** 알림 발송 (fire-and-forget) — 인박스 생성 + 형제계정 미러 + 알림설정 판정 + 푸시를 V2가 전부 처리 */
+  sendNotification: {
+    path: "/super_school.NotificationInboxService/SendNotification" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: SendNotificationRequest): Buffer =>
+      Buffer.from(SendNotificationRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): SendNotificationRequest => SendNotificationRequest.decode(value),
+    responseSerialize: (value: SendNotificationResponse): Buffer =>
+      Buffer.from(SendNotificationResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer): SendNotificationResponse => SendNotificationResponse.decode(value),
+  },
 } as const;
 
 export interface NotificationInboxServiceServer extends UntypedServiceImplementation {
   /** 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄. */
   createUserNotifications: handleUnaryCall<CreateUserNotificationsRequest, CreateUserNotificationsResponse>;
+  /** 알림 발송 (fire-and-forget) — 인박스 생성 + 형제계정 미러 + 알림설정 판정 + 푸시를 V2가 전부 처리 */
+  sendNotification: handleUnaryCall<SendNotificationRequest, SendNotificationResponse>;
 }
 
 interface MessageFns<T> {

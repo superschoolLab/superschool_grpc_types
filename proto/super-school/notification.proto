@@ -2,10 +2,12 @@ syntax = "proto3";
 
 package super_school;
 
-// 알림센터 인박스(user_notification) — 레거시 → V2 dual-write fan-out
+// 레거시 → V2 알림 (알림센터 인박스 fan-out + 발송)
 service NotificationInboxService {
   // 수신자별 알림 인박스 행 생성 (fire-and-forget). CHAT 타입은 호출측에서 제외하고 보냄.
   rpc CreateUserNotifications(CreateUserNotificationsRequest) returns (CreateUserNotificationsResponse);
+  // 알림 발송 (fire-and-forget) — 인박스 생성 + 형제계정 미러 + 알림설정 판정 + 푸시를 V2가 전부 처리
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
 }
 
 // --- 알림 인박스 fan-out 생성 ---
@@ -21,3 +23,18 @@ message CreateUserNotificationsRequest {
 
 // 응답 없음 (fire-and-forget) — 빈 메시지로 void 처리
 message CreateUserNotificationsResponse {}
+
+// --- 알림 발송 ---
+message SendNotificationRequest {
+  repeated string targetEmails = 1; // 수신자 이메일 전체 (끊지 말고 한 번에 — 형제계정 미러가 발송 1회 기준으로 계산됨)
+  int32 schoolId = 2; // 푸시 제목 앞 학교명 조회용
+  string title = 3;
+  string body = 4;
+  string url = 5; // 리다이렉트 URL, 없으면 ""
+  string type = 6; // NotificationLogType 값 — CHAT 이면 인박스·미러 없이 푸시만
+  optional int32 documentId = 7; // 소스 문서 id, 없으면 unset
+  string notificationType = 8; // 알림설정 종류 스위치 (approvals/attendances/chats/posts), 없으면 "" → 허용 시간만 적용
+}
+
+// 응답 없음 (fire-and-forget)
+message SendNotificationResponse {}

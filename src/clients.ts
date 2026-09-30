@@ -54,6 +54,8 @@ import type {
   ResetPasswordAttemptCountResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SendNotificationRequest,
+  SendNotificationResponse,
   UpdateSmsFilterRequest,
   UpdateSmsFilterResponse,
 } from './index';
@@ -70,6 +72,7 @@ export interface NoticeCrawlingGrpcClient {
 
 export interface NotificationInboxGrpcClient {
   CreateUserNotifications(request: CreateUserNotificationsRequest, metadata?: Metadata): Observable<CreateUserNotificationsResponse>;
+  SendNotification(request: SendNotificationRequest, metadata?: Metadata): Observable<SendNotificationResponse>;
 }
 
 export interface ParentUserGrpcClient {
