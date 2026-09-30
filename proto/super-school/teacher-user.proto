@@ -11,9 +11,10 @@ service TeacherUserService {
 message FindTeacherListRequest {
   int32 page = 1;
   int32 limit = 2;
-  optional string name = 3;
+  optional string name = 3; // 완전일치 검색 (컴플라이언스 5.13)
   int32 schoolId = 4;
   optional string role = 5;
+  optional string email = 6; // 완전일치 검색
 }
 
 message FindTeacherListResponse {

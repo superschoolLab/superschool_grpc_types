@@ -11,8 +11,12 @@ service StudentUserService {
 message FindStudentListRequest {
   int32 page = 1;
   int32 limit = 2;
-  optional string name = 3;
+  optional string name = 3; // 완전일치 검색 (컴플라이언스 5.13)
   int32 schoolId = 4;
+  optional string email = 5; // 완전일치 검색
+  optional int32 grade = 6; // 학년
+  optional int32 klass = 7; // 반
+  optional int32 number = 8; // 번호
 }
 
 message FindStudentListResponse {
